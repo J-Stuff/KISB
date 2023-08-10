@@ -31,7 +31,7 @@ class mainCog(commands.Cog):
         asyncio.run
         try:
             mcPlayerCount = await asyncio.wait_for(Server().fetch(mcServer), timeout=5)
-        except TimeoutError:
+        except:
             logging.debug("Failed to connect to the server.")
             mcPlayerCount = "OFFLINE"
         logging.debug("Fetched Minecraft Player Count.")
@@ -122,7 +122,7 @@ class mainCog(commands.Cog):
 
     def checkIfCacheExpired(self):
         logging.info("Checking if cache is expired...")
-        cacheExpiry = 90 # Cache Expiry value in seconds (I would really discourage changing this to a value lower than 60)
+        cacheExpiry = 20 # Cache Expiry value in seconds (I would really discourage changing this to a value lower than 15)
         dataStore = json.load(open('./data/database/database.json', 'r'))
         if int(time.time()) - dataStore["minecraftLU"] > cacheExpiry:
             logging.debug("Cache expired!")
@@ -222,7 +222,7 @@ class mainCog(commands.Cog):
 
 
 
-    @tasks.loop(minutes=5)
+    @tasks.loop(minutes=1)
     async def updateEmbed(self):
         logging.info("Updating embed...")
         if not os.path.exists('./cache/cache'):
@@ -238,7 +238,7 @@ class mainCog(commands.Cog):
             minecraftEmbed.add_field(name="Server Status:", value=f"<:HighConnection:1136504263204421732> **-** Players: {cachedData['minecraft']['playercount']}", inline=False)
         else:
             minecraftEmbed.add_field(name="Server Status:", value="<:NoConnection:1136504297853550744> **-** Offline!", inline=False)
-        minecraftEmbed.set_footer(text="Updates every 5 minutes. Last updated:")
+        minecraftEmbed.set_footer(text="Updates every minute. Last updated:")
         
         rustEmbed = discord.Embed(title="KI - Rust Server Status", description="Connect - `51.161.196.138:28015`", timestamp=datetime.datetime.now(), color=discord.Color.from_str("#CE422B"))
         rustEmbed.set_author(name="KISB", url="https://github.com/J-Stuff/KISB")
@@ -251,7 +251,7 @@ class mainCog(commands.Cog):
             rustEmbed.add_field(name="Player count", value=f"{cachedData['rust']['players']}/{cachedData['rust']['max_players']}", inline=False)
         else:
             rustEmbed.add_field(name="Server Status", value="<:NoConnection:1136504297853550744> **-** Offline!", inline=False)
-        rustEmbed.set_footer(text="Updates every 5 minutes. Last updated:")
+        rustEmbed.set_footer(text="Updates every minute. Last updated:")
 
         zomboidEmbed = discord.Embed(title="KI - Project Zomboid Server Status", description="Connect - `51.161.196.138:8770`", timestamp=datetime.datetime.now(), color=discord.Color.from_str("#111111"))
         zomboidEmbed.set_author(name="KISB", url="https://github.com/J-Stuff/KISB")
@@ -264,14 +264,14 @@ class mainCog(commands.Cog):
             zomboidEmbed.add_field(name="Player count", value=f"{cachedData['pz']['players']}/{cachedData['pz']['max_players']}", inline=False)
         else:
             zomboidEmbed.add_field(name="Server Status", value="<:NoConnection:1136504297853550744> Offline!", inline=False)
-        zomboidEmbed.set_footer(text="Updates every 5 minutes. Last updated:")
+        zomboidEmbed.set_footer(text="Updates every minute. Last updated:")
 
         scpslEmbed = discord.Embed(title="KI - SCP: Secret Laboratory Server Status", description="Connect - Via the playerlist in-game", timestamp=datetime.datetime.now(), color=discord.Color.teal())
         scpslEmbed.set_author(name="KISB", url="https://github.com/J-Stuff/KISB")
         scpslEmbed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1136583178191114270/1136583568475291648/vn5K5O6d_400x400.jpg")
         for server in cachedData['scpsl']:
             scpslEmbed.add_field(name=">", value=server, inline=False)
-        scpslEmbed.set_footer(text="Updates every 5 minutes. Last updated:")
+        scpslEmbed.set_footer(text="Updates every minute. Last updated:")
 
         dataStore = json.load(open('./data/database/database.json', 'r'))
         logging.info("Fetching embed channel...")
@@ -344,6 +344,14 @@ class mainCog(commands.Cog):
         await ctx.reply("Syncing...")
         logging.info(await self.bot.tree.sync())
         await ctx.reply("Synced!")
+
+    @commands.command(name='debug')
+    @commands.is_owner()
+    async def debug(self, ctx:commands.Context):
+        await ctx.reply("Dumping...")
+        await ctx.reply(file=discord.File('./cache/cache'))
+        await ctx.reply(file=discord.File('./data/database/database.json'))
+        await ctx.reply("Dumped!")
 
     
 async def setup(bot:KISB):

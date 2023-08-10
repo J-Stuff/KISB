@@ -6,10 +6,8 @@ This is a bot that will post the status of the KI Network to a Discord embed. As
 - JStuffNZ - Main Developer
 
 
-## Requirements
-
-### Rust
-- http://playrust.io/manual/#!index.md
+## Version: 
+- 1.0.1
 
 ### Required Environment Variables
 "TOKEN" - Discord Bot Token
