@@ -306,6 +306,7 @@ class mainCog(commands.Cog):
         logging.info("Editing embed...")
         await message.edit(embeds=[minecraftEmbed, rustEmbed, zomboidEmbed, scpslEmbed])
         logging.info("Embed updated!")
+        await Log.info(self.bot, "Embed updated!")
 
 
 
@@ -358,6 +359,7 @@ class mainCog(commands.Cog):
 
 
         await i.followup.send(embeds=[minecraftEmbed, rustEmbed, zomboidEmbed, scpslEmbed], ephemeral=True)
+        await Log.info(self.bot, "Status command used!", i.user)
 
 
     @app_commands.command(name="about", description="Get information about the bot")
@@ -370,6 +372,7 @@ class mainCog(commands.Cog):
         embed.add_field(name="Uptime", value=str(datetime.datetime.now() - self.bot.uptime).split(".")[0], inline=False)
         embed.add_field(name="Gateway Ping", value=f"{await self.ping()}ms", inline=False)
         await i.followup.send(embed=embed, ephemeral=True)
+        await Log.info(self.bot, "About command used!", i.user)
 
 
     @commands.command(name='sync')
@@ -379,6 +382,7 @@ class mainCog(commands.Cog):
         await ctx.reply("Syncing...")
         logging.info(await self.bot.tree.sync())
         await ctx.reply("Synced!")
+        
 
     @commands.command(name='debug')
     @commands.is_owner()
