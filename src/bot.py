@@ -9,6 +9,7 @@ from modules.minecraft import Server, Exceptions as mcExceptions
 from modules.pz import PZ, Exceptions as pzExceptions
 from modules.rust import Rust, Exceptions as rustExceptions
 from modules.scpsl import SCPSL
+from modules.logging import Logging as Log
 
 class mainCog(commands.Cog):
     def __init__(self, bot:KISB) -> None:
@@ -40,7 +41,7 @@ class mainCog(commands.Cog):
         logging.debug("Fetching PZ Server Info...")
         try:
             pzServer = await PZ().fetch()
-        except pzExceptions.FailedToConnect:
+        except:
             pzServer = ["OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE"]
         logging.debug("Fetched PZ Server Info.")
         logging.debug(pzServer)
@@ -48,7 +49,7 @@ class mainCog(commands.Cog):
         logging.debug("Fetching Rust Server Info...")
         try:
             rustServer = await Rust().fetch()
-        except rustExceptions.FailedToConnect:
+        except:
             rustServer = ["OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE", "OFFLINE"]
         logging.debug("Fetched Rust Server Info.")
         logging.debug(rustServer)
@@ -144,6 +145,13 @@ class mainCog(commands.Cog):
         with open('./cache/cache', 'r') as f:
             return json.load(f)
 
+    # Get the bots gateway ping to discord servers
+    async def ping(self) -> float:
+        logging.info("Getting ping...")
+        return round(self.bot.latency * 1000)
+        
+
+
 
 
 
@@ -219,7 +227,20 @@ class mainCog(commands.Cog):
         logging.info("Logs exported!")
         await response.edit(content="Done!")
 
-
+    @tasks.loop(minutes=10)
+    async def healthCheck(self):
+        deathTimeout = 120 # Number of seconds before the bot is considered dead - MAKE SURE THIS IS HIGHER THAN THE EMBED LOOP INTERVAL
+        logging.info("Running health check...")
+        if not os.path.exists('./cache/cache'):
+            logging.warning("Cache doesn't exist! Bot is likely awaiting initialization. Skipping...")
+            return
+        dataStore = json.load(open('./data/database/database.json', 'r'))
+        if int(time.time()) - dataStore["minecraftLU"] > deathTimeout:
+            await Log.warn(self.bot, "Bot found dead!")
+            for cog in self.bot.cogList:
+                await self.bot.reload_extension(f"{cog}")
+        else:
+            logging.info("Bot is alive!")
 
 
     @tasks.loop(minutes=1)
@@ -337,6 +358,19 @@ class mainCog(commands.Cog):
 
         await i.followup.send(embeds=[minecraftEmbed, rustEmbed, zomboidEmbed, scpslEmbed], ephemeral=True)
 
+
+    @app_commands.command(name="about", description="Get information about the bot")
+    async def about(self, i:discord.Interaction):
+        await i.response.defer(thinking=True, ephemeral=True)
+        embed = discord.Embed(title="About KISB", description=f"Hi, I'm KISB (Kitchen Island Status Bot) I'm a monitoring bot used to display player counts for the KI game servers.\nI'm fully coded from the ground up by my author `{self.bot.buildInfo.AUTHOR}` with some help from a few open source libraries.\nSee my source code at: {self.bot.buildInfo.REPOSITORY}", color=discord.Color.from_str("#4A6F28"))
+        embed.set_author(name="KISB")
+        embed.add_field(name="Version", value=self.bot.buildInfo.VERSION, inline=False)
+        embed.add_field(name="Build Date", value=self.bot.buildInfo.DATE, inline=False)
+        embed.add_field(name="Uptime", value=str(datetime.datetime.now() - self.bot.uptime).split(".")[0], inline=False)
+        embed.add_field(name="Gateway Ping", value=f"{await self.ping()}ms", inline=False)
+        await i.followup.send(embed=embed, ephemeral=True)
+
+
     @commands.command(name='sync')
     @commands.is_owner()
     @commands.dm_only()
@@ -348,10 +382,16 @@ class mainCog(commands.Cog):
     @commands.command(name='debug')
     @commands.is_owner()
     async def debug(self, ctx:commands.Context):
-        await ctx.reply("Dumping...")
-        await ctx.reply(file=discord.File('./cache/cache'))
-        await ctx.reply(file=discord.File('./data/database/database.json'))
-        await ctx.reply("Dumped!")
+        status = await ctx.reply("Dumping...")
+        try:
+            await ctx.reply(file=discord.File('./cache/cache'))
+            await ctx.reply(file=discord.File('./data/database/database.json'))
+        except discord.Forbidden:
+            await status.edit(content="I lack permissions to send files here!")
+            return
+        else:
+            await status.edit(content="Done!")
+
 
     
 async def setup(bot:KISB):
