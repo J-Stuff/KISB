@@ -15,6 +15,7 @@ class mainCog(commands.Cog):
     def __init__(self, bot:KISB) -> None:
         self.bot = bot
         self.updateEmbed.start()
+        self.healthCheck.start()
         super().__init__()
 
     async def updateCache(self):
