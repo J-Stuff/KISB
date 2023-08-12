@@ -8,7 +8,7 @@ from fractions import Fraction
 from modules.minecraft import Server, Exceptions as mcExceptions
 from modules.pz import PZ, Exceptions as pzExceptions
 from modules.rust import Rust, Exceptions as rustExceptions
-from modules.scpsl import SCPSL
+from modules.scpsl import SCPSL, Exceptions as scpslExceptions
 from modules.logging import Logging as Log
 
 class mainCog(commands.Cog):
@@ -17,6 +17,14 @@ class mainCog(commands.Cog):
         self.updateEmbed.start()
         self.healthCheck.start()
         super().__init__()
+
+    async def safe_restart(self):
+        logging.info("Restarting...")
+        self.healthCheck.stop()
+        self.updateEmbed.stop()
+        for cog in self.bot.cogList:
+            await self.bot.reload_extension(f"{cog}")
+        logging.info("Cogs reloaded!")
 
     async def updateCache(self):
         if not self.checkIfCacheExpired():
@@ -56,8 +64,10 @@ class mainCog(commands.Cog):
         logging.debug(rustServer)
 
 
-
-        scpslServer = await SCPSL().fetch()
+        try:
+            scpslServer = await SCPSL().fetch()
+        except:
+            scpslServer = {"Servers": []}
         logging.debug(scpslServer)
         await asyncio.sleep(2)
 
@@ -173,8 +183,7 @@ class mainCog(commands.Cog):
             await old_EMBED_MESSAGE.delete()
         except Exception as e:
             logging.error(f"Error while deleting old embed: {e}")
-            await ctx.send("Error while deleting old embed! Forcing to continue...")
-            await ctx.send(f"```{e}```")
+            await ctx.send("Error while deleting old embed! Forcing to continue...", delete_after=5)
 
 
         open('./data/database/database.json', 'w').close()
@@ -198,8 +207,7 @@ class mainCog(commands.Cog):
             json.dump(payload, f)
             f.close()
         logging.info("Reloading cogs...")
-        for cog in self.bot.cogList:
-            await self.bot.reload_extension(f"{cog}")
+        await self.safe_restart()
         await response.edit(content="Done!\n(This message self destructs in 10 seconds)", delete_after=10)
 
 
@@ -208,9 +216,7 @@ class mainCog(commands.Cog):
     async def restart(self, ctx:commands.Context):
         logging.info("Reloading cogs...")
         response = await ctx.reply("Restarting...")
-        for cog in self.bot.cogList:
-            await self.bot.reload_extension(f"{cog}")
-        logging.info("Cogs reloaded!")
+        await  self.safe_restart()
         await response.edit(content="Done!")
 
 
@@ -291,8 +297,11 @@ class mainCog(commands.Cog):
         scpslEmbed = discord.Embed(title="KI - SCP: Secret Laboratory Server Status", description="Connect - Via the playerlist in-game", timestamp=datetime.datetime.now(), color=discord.Color.teal())
         scpslEmbed.set_author(name="KISB", url="https://github.com/J-Stuff/KISB")
         scpslEmbed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1136583178191114270/1136583568475291648/vn5K5O6d_400x400.jpg")
-        for server in cachedData['scpsl']:
-            scpslEmbed.add_field(name=">", value=server, inline=False)
+        if len(cachedData['scpsl']) > 0:
+            for server in cachedData['scpsl']:
+                scpslEmbed.add_field(name=">", value=server, inline=False)
+        else:
+            scpslEmbed.add_field(name="Network Status", value="<:NoConnection:1136504297853550744> Centrals reported malformed data to me!", inline=False)
         scpslEmbed.set_footer(text="Updates every minute. Last updated:")
 
         dataStore = json.load(open('./data/database/database.json', 'r'))
@@ -354,8 +363,11 @@ class mainCog(commands.Cog):
         scpslEmbed = discord.Embed(title="KI - SCP: Secret Laboratory Server Status", description="Connect - Via the playerlist in-game", timestamp=datetime.datetime.now(), color=discord.Color.teal())
         scpslEmbed.set_author(name="KISB", url="https://github.com/J-Stuff/KISB")
         scpslEmbed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1136583178191114270/1136583568475291648/vn5K5O6d_400x400.jpg")
-        for server in cachedData['scpsl']:
-            scpslEmbed.add_field(name=">", value=server, inline=False)
+        if len(cachedData['scpsl']) > 0:
+            for server in cachedData['scpsl']:
+                scpslEmbed.add_field(name=">", value=server, inline=False)
+        else:
+            scpslEmbed.add_field(name="Network Status", value="<:NoConnection:1136504297853550744> Centrals reported malformed data to me!", inline=False)
 
 
         await i.followup.send(embeds=[minecraftEmbed, rustEmbed, zomboidEmbed, scpslEmbed], ephemeral=True)
@@ -370,7 +382,7 @@ class mainCog(commands.Cog):
         embed.add_field(name="Version", value=self.bot.buildInfo.VERSION, inline=False)
         embed.add_field(name="Build Date", value=self.bot.buildInfo.DATE, inline=False)
         embed.add_field(name="Uptime", value=str(datetime.datetime.now() - self.bot.uptime).split(".")[0], inline=False)
-        embed.add_field(name="Gateway Ping", value=f"{await self.ping()}ms", inline=False)
+        embed.add_field(name="Gateway Ping", value=f"`{await self.ping()}ms`", inline=False)
         await i.followup.send(embed=embed, ephemeral=True)
         await Log.info(self.bot, "About command used!", i.user)
 
