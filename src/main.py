@@ -2,7 +2,12 @@ import logging, os
 from _kisb import KISB
 from dotenv import load_dotenv
 
-load_dotenv("../.env")
+if os.path.exists("../.env"):
+    load_dotenv("../.env") # Used for development
+
+if os.path.exists('./cache/CACHE'):
+    os.remove('./cache/CACHE')
+
 # Logging
 if os.path.exists('./data/logs/kisb.log.old'):
     os.remove('./data/logs/kisb.log.old')

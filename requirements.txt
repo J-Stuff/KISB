@@ -229,11 +229,9 @@ rcon==2.4.2 \
 requests==2.31.0 \
     --hash=sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f \
     --hash=sha256:942c5a758f98d790eaed1a29cb6eefc7ffb0d1cf7af05c3d2791656dbd6ad1e1
-rustplus==5.6.10 \
-    --hash=sha256:1a75780bae1aaba43825de85e0d064ad883aba82a63fa3cd1198c6bc328bb4d7 \
-    --hash=sha256:44407c3694adefe95faee80220bde199f368bf5f42dde7e07ddf1b9f6702fd95
-rustPlusPushReceiver==0.4.1 \
-    --hash=sha256:eac2322e48cb359bdc2e98761ec3546fbcccbb43028ef5a7fb09472360494ef9
+schedule==1.2.0 \
+    --hash=sha256:415908febaba0bc9a7c727a32efb407d646fe994367ef9157d123aabbe539ea8 \
+    --hash=sha256:b4ad697aafba7184c9eb6a1e2ebc41f781547242acde8ceae9a0a25b04c0922d
 scipy==1.9.3 \
     --hash=sha256:06d2e1b4c491dc7d8eacea139a1b0b295f74e1a1a0f704c375028f8320d16e31 \
     --hash=sha256:83c06e62a390a9167da60bedd4575a14c1f58ca9dfde59830fc42e5197283dab \
@@ -248,9 +246,6 @@ steamquery==1.0.2 \
     --hash=sha256:075902080d60dea2533943d2e7d7e851ee0a9fe8db1e4dcf4f5b45cd32e4aa19
 timeout-decorator==0.5.0 \
     --hash=sha256:6a2f2f58db1c5b24a2cc79de6345760377ad8bdc13813f5265f6c3e63d16b3d7
-tinydb==4.8.0 \
-    --hash=sha256:30c06d12383d7c332e404ca6a6103fb2b32cbf25712689648c39d9a6bd34bd3d \
-    --hash=sha256:6dd686a9c5a75dfa9280088fd79a419aefe19cd7f4bd85eba203540ef856d564
 urllib3==2.0.4 \
     --hash=sha256:8d22f86aae8ef5e410d4f539fde9ce6b2113a001bb4d189e0aed70642d602b11 \
     --hash=sha256:de7df1803967d2c2a98e4b11bb7d6bd9210474c46e8a0401514e3a42a75ebde4
@@ -300,6 +295,3 @@ yarl==1.9.2 \
     --hash=sha256:b8cc1863402472f16c600e3e93d542b7e7542a540f95c30afd472e8e549fc3f7 \
     --hash=sha256:be6b3fdec5c62f2a67cb3f8c6dbf56bbf3f61c0f046f84645cd1ca73532ea051 \
     --hash=sha256:d4e2c6d555e77b37288eaf45b8f60f0737c9efa3452c6c44626a5455aeb250b9
-zomboid-rcon==1.0.2 \
-    --hash=sha256:538a0bd830abfc5e706eb813241db6c60e3de3a6c9d998418cd966df66ad3d85 \
-    --hash=sha256:f2f28d07a5beca7f723e5c56547cb9ec19b9cb4dcfe9496e3333935ff7403a96

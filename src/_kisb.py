@@ -7,16 +7,19 @@ cogs = [
 ]
 
 class Build(StrEnum):
-    VERSION = "1.0.4"
-    DATE = "13.08.2023"
+    VERSION = "1.1.0"
+    DATE = "03.10.2023"
     AUTHOR = "J Stuff"
     REPOSITORY = "https://github.com/J-Stuff/KISB"
+
+IP = ""
 
 class KISB(commands.Bot):
     def __init__(self):
         self.cogList = cogs
         self.buildInfo = Build
         self.uptime = datetime.datetime.now()
+        self.ip = IP
         super().__init__(";", help_command=None, intents=discord.Intents.default())
     
     async def on_ready(self):

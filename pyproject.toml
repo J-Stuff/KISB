@@ -41,17 +41,15 @@ dependencies = [
     "python-dotenv==1.0.0",
     "rcon==2.4.2",
     "requests==2.31.0",
-    "rustplus==5.6.10",
-    "rustPlusPushReceiver==0.4.1",
     "scipy==1.9.3",
     "six==1.16.0",
     "steamquery==1.0.2",
     "timeout-decorator==0.5.0",
-    "tinydb==4.8.0",
     "urllib3==2.0.4",
     "websockets==11.0.3",
     "yarl==1.9.2",
-    "zomboid-rcon==1.0.2",
+    "schedule>=1.2.0",
+    "schedule==1.2.0",
 ]
 requires-python = ">=3.11"
 license = {text = "MIT"}
