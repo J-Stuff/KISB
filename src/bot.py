@@ -134,7 +134,7 @@ class mainCog(commands.Cog):
 
     def checkIfCacheExpired(self):
         logging.info("Checking if cache is expired...")
-        cacheExpiry = 20 # Cache Expiry value in seconds (I would really discourage changing this to a value lower than 15)
+        cacheExpiry = 30 # Cache Expiry value in seconds (I would really discourage changing this to a value lower than 30)
         dataStore = json.load(open('./data/database/database.json', 'r'))
         if int(time.time()) - dataStore["minecraftLU"] > cacheExpiry:
             logging.debug("Cache expired!")
@@ -244,13 +244,12 @@ class mainCog(commands.Cog):
         dataStore = json.load(open('./data/database/database.json', 'r'))
         if int(time.time()) - dataStore["minecraftLU"] > deathTimeout:
             await Log.warn(self.bot, "Bot found dead!")
-            for cog in self.bot.cogList:
-                await self.bot.reload_extension(f"{cog}")
+            await self.safe_restart()
         else:
             logging.info("Bot is alive!")
 
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(seconds=120)
     async def updateEmbed(self):
         logging.info("Updating embed...")
         if not os.path.exists('./cache/cache'):
