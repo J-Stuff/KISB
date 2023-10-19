@@ -55,7 +55,7 @@ class mainCog(commands.Cog):
     def generate_embeds(self, updateNotice:bool = False) -> list[discord.Embed]:
         cache = DM.read_cache()
         embeds = []
-        serverNames = {"60048": "Official", "68070": "Server 1"} # These need to be the {"SERVER ID": "DISPLAY NAME"}
+        serverNames = {"60048": "Official 1", "68070": "Official 2"} # These need to be the {"SERVER ID": "DISPLAY NAME"}
 
         # SL Embed Processing
         slEmbed = discord.Embed(color=discord.Color.blurple(), title="KI Status: SCP:SL Servers", description="Connect: `via the playerlist ingame`", timestamp=datetime.datetime.fromtimestamp(cache['updated']))
