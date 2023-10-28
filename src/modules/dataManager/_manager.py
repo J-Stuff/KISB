@@ -18,8 +18,11 @@ class DataManager():
     def read_cache(cls) -> dict:
         return json.load(open(cls.cache_location, 'r'))
     
-    def _write_cache(self, data:dict) -> None:
-        json.dump(data, open(self.cache_location, 'w'))
+    async def _write_cache(self, data:dict) -> None:
+        cache = open(self.cache_location, 'w')
+        json.dump(data, cache)
+        cache.close()
+        return
 
     async def update_cache(self) -> None:
         if self.scpslid is None or self.scpslkey is None:
@@ -29,7 +32,7 @@ class DataManager():
         
         scpsl = await SL.fetch(self.bot, self.scpslid, self.scpslkey)
 
-        self._write_cache({"sl": scpsl, "updated": time.time()})
+        await self._write_cache({"sl": scpsl, "updated": time.time()})
 
     @staticmethod
     def lock(toggle:bool):

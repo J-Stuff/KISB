@@ -36,7 +36,7 @@ class mainCog(commands.Cog):
 
 
     async def safe_restart(self):
-        from _kisb import restart
+        from modules.restart import restart
         await restart(self.bot)
 
 
