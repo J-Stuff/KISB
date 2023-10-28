@@ -36,28 +36,26 @@ class mainCog(commands.Cog):
 
 
     async def safe_restart(self):
-        logging.info("Restarting...")
-        self.updateEmbed.stop()
-        self.update_cache.stop()
-        logging.debug("All Services Stopped - Waiting 5 seconds and cleaning up any locks...")
-        DM.lock(False)
-        await asyncio.sleep(5)
-
-        logging.debug("Cleanup & wait complete! Starting services back up!")
-        self.update_cache.start()
-        await asyncio.sleep(5)
-        self.updateEmbed.start()
-        logging.info("Restart complete!")
+        from _kisb import restart
+        await restart(self.bot)
 
 
 
 
-    def generate_embeds(self, updateNotice:bool = False) -> list[discord.Embed]:
+    def generate_embeds(self, updateNotice:bool = False) -> list[discord.Embed]:        
         cache = DM.read_cache()
         embeds = []
         serverNames = {"60048": "Official 1", "68070": "Official 2"} # These need to be the {"SERVER ID": "DISPLAY NAME"}
 
         # SL Embed Processing
+        @staticmethod
+        def check_if_server_should_be_shown(serverID:str) -> bool:
+            try:
+                name = serverNames[serverID]
+                return True
+            except:
+                return False
+        
         slEmbed = discord.Embed(color=discord.Color.blurple(), title="KI Status: SCP:SL Servers", description="Connect: `via the playerlist ingame`", timestamp=datetime.datetime.fromtimestamp(cache['updated']))
         slEmbed.set_author(name="KISB", url="https://github.com/J-Stuff/KISB")
         slEmbed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1136583178191114270/1136583568475291648/vn5K5O6d_400x400.jpg")
@@ -68,11 +66,10 @@ class mainCog(commands.Cog):
         
         slServers = cache['sl']['Servers']
         for server in slServers:
-            serverID = str(server['ID'])
-            try:
-                name = serverNames[serverID]
-            except:
+            if not check_if_server_should_be_shown(server['ID']):
                 continue
+            serverID = str(server['ID'])
+            name = serverNames[serverID]
             playercount = Fraction(server['Players']).as_integer_ratio()
             if playercount[0] >= playercount[1] and server['Online']:
                 slEmbed.add_field(name=name, value=f"<:ServerFull:1137640034439286826> - `{server['Players']} Players Online`", inline=False)
@@ -96,13 +93,17 @@ class mainCog(commands.Cog):
 
     @tasks.loop(seconds=30)
     async def update_cache(self):
-        DM.lock(True)
-        if await DM.checkIfCacheExpired(self.bot):
-            await DM(self.bot).update_cache()
-        else:
-            logging.warn("Attempted to update Cache while it was still fresh!")
-            await Log.warn(self.bot, "Attempted to update Cache while it was still fresh!")
-        DM.lock(False)
+        try:
+            DM.lock(True)
+            if await DM.checkIfCacheExpired(self.bot):
+                await DM(self.bot).update_cache()
+            else:
+                logging.warn("Attempted to update Cache while it was still fresh!")
+                await Log.warn(self.bot, "Attempted to update Cache while it was still fresh!")
+            DM.lock(False)
+        except:
+            DM.lock(False)
+            await self.safe_restart()
 
     @tasks.loop(seconds=60)
     async def updateEmbed(self):
@@ -132,8 +133,8 @@ class mainCog(commands.Cog):
             return
         await i.response.defer(thinking=True, ephemeral=False)
         await Log.info(self.bot, "Reloading cogs...", i.user)
+        await i.followup.send(content="Reloading cogs...", ephemeral=True)
         await self.safe_restart()
-        await i.followup.send(content="Done!")
 
 
     @app_commands.command(name="export-logs")

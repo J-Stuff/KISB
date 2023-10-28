@@ -8,7 +8,7 @@ This is a bot that will post the status of the KI Network to a Discord embed. As
 
 
 ## Version: 
-- 1.1.2
+- 1.1.3
 
 ### Required Environment Variables
 "TOKEN" - Discord Bot Token
