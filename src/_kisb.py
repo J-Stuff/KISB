@@ -1,7 +1,6 @@
-import discord, logging, datetime, asyncio
+import discord, logging, datetime
 from discord.ext import commands
 from enum import StrEnum
-from modules.dataManager._manager import DataManager as DM
 
 cogs = [
     'bot'
