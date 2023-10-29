@@ -1,16 +1,16 @@
-import discord, json, time, datetime, os, logging, asyncio
+import discord, json, time, datetime, os, logging, asyncio, typing
 from discord.ext import commands, tasks
 from discord import app_commands
 from _kisb import KISB
 from fractions import Fraction
 from modules.dataManager._manager import DataManager as DM
-from modules.logging import Logging as Log
+from modules.dataManager._loop import start as updater
 
 class mainCog(commands.Cog):
     def __init__(self, bot:KISB) -> None:
         logging.debug("Main cog has init-ed")
         self.bot = bot
-        self.update_cache.start()
+        updater(bot)
         time.sleep(5)
         self.updateEmbed.start()
         super().__init__()
@@ -35,42 +35,52 @@ class mainCog(commands.Cog):
 
 
 
-    async def safe_restart(self):
-        from modules.restart import restart
-        await restart(self.bot)
+
+    def generate_embeds(self, updateNotice:bool = False) -> list[discord.Embed]:
+        SL_TRANSLATIONS = {"60048": "Official 1", "68070": "Official 2"} # These need to be the {"SERVER ID": "DISPLAY NAME"}
+
+        def filter_sl_server(ID:int) -> bool:
+            logging.debug(f"Filtering server: {ID}")
+            if str(ID) in SL_TRANSLATIONS.keys():
+                logging.debug(f"Server {ID} is in the list!")
+                return True
+            else:
+                logging.debug(f"Server {ID} is not in the list!")
+                return False
+            
 
 
-
-
-    def generate_embeds(self, updateNotice:bool = False) -> list[discord.Embed]:        
+        logging.info("Generating embeds...")
+        logging.debug(f"Showing Live update Notice: {updateNotice}")
         cache = DM.read_cache()
+        logging.debug(f"Cache read! - {cache}")
         embeds = []
-        serverNames = {"60048": "Official 1", "68070": "Official 2"} # These need to be the {"SERVER ID": "DISPLAY NAME"}
+        
 
         # SL Embed Processing
-        @staticmethod
-        def check_if_server_should_be_shown(serverID:str) -> bool:
-            try:
-                name = serverNames[serverID]
-                return True
-            except:
-                return False
+        logging.debug("Processing SL Embed...")
+        slServers = cache['sl']['Servers']
+        logging.debug(f"SL Server Data: {slServers}")
         
-        slEmbed = discord.Embed(color=discord.Color.blurple(), title="KI Status: SCP:SL Servers", description="Connect: `via the playerlist ingame`", timestamp=datetime.datetime.fromtimestamp(cache['updated']))
+        slEmbed = discord.Embed(title="Server List", description="Connect: `via the server list`", color=discord.Color.blurple(), timestamp=datetime.datetime.fromtimestamp(cache['updated']))
         slEmbed.set_author(name="KISB", url="https://github.com/J-Stuff/KISB")
         slEmbed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1136583178191114270/1136583568475291648/vn5K5O6d_400x400.jpg")
         if updateNotice:
             slEmbed.set_footer(text="Updates every Minute - Last Updated")
         else:
             slEmbed.set_footer(text="Last updated")
-        
-        slServers = cache['sl']['Servers']
+        logging.debug("SL Main Embed Created! Starting work on dynamic data...")
+
         for server in slServers:
-            if not check_if_server_should_be_shown(server['ID']):
+            logging.debug(f"Processing Server: {server['ID']}")
+            if not filter_sl_server(server['ID']):
+                logging.debug(f"Skipping server: {server['ID']}")
                 continue
-            serverID = str(server['ID'])
-            name = serverNames[serverID]
+            logging.debug(f"Continuing with server: {server['ID']}")
+
             playercount = Fraction(server['Players']).as_integer_ratio()
+            serverID = str(server['ID'])
+            name = SL_TRANSLATIONS[serverID]
             if playercount[0] >= playercount[1] and server['Online']:
                 slEmbed.add_field(name=name, value=f"<:ServerFull:1137640034439286826> - `{server['Players']} Players Online`", inline=False)
             
@@ -79,43 +89,35 @@ class mainCog(commands.Cog):
             
             elif not server['Online']:
                 slEmbed.add_field(name=name, value="<:NoConnection:1136504297853550744> - `Offline`", inline=False)
+
         embeds.append(slEmbed)
 
+        logging.info("All Done! Number of embeds: " + str(len(embeds)))
         return embeds
         
 
     # Get the bots gateway ping to discord servers
     async def ping(self) -> float:
-        await Log.info(self.bot, "Getting ping...")
+        logging.debug("Getting gateway ping...")
         return round(self.bot.latency * 1000)
     
 
 
-    @tasks.loop(seconds=30)
-    async def update_cache(self):
-        try:
-            DM.lock(True)
-            if await DM.checkIfCacheExpired(self.bot):
-                await DM(self.bot).update_cache()
-            else:
-                logging.warn("Attempted to update Cache while it was still fresh!")
-                await Log.warn(self.bot, "Attempted to update Cache while it was still fresh!")
-            DM.lock(False)
-        except:
-            DM.lock(False)
-            await self.safe_restart()
-
     @tasks.loop(seconds=60)
     async def updateEmbed(self):
-        await Log.info(self.bot, "Updating embed...")
+        logging.info("Updating embed...")
         while DM.lock_check():
             logging.info("LOCKED! Waiting 1 second...")
             await asyncio.sleep(1)
         if not DM.checkIfCacheExists():
-            logging.info("Cache doesn't exist! Skipping...")
+            logging.info("Cache doesn't exist! The bot likely hasn't finished booting yet...")
             return
         embeds = self.generate_embeds(True)
-        data = self.database.read()
+        try:
+            data = self.database.read()
+        except:
+            logging.warn("Database read failed! The bot probably hasn't been initialized yet.")
+            return
         CHANNEL = await self.bot.fetch_channel(data['channel'])
         MESSAGE = await CHANNEL.fetch_message(data['message']) #type:ignore
         await MESSAGE.edit(embeds=embeds)
@@ -123,19 +125,6 @@ class mainCog(commands.Cog):
 
 
     # ==== ADMIN SLASH COMMANDS ====
-
-    @app_commands.command(name="reload")
-    async def restart(self, i:discord.Interaction):
-        logging.info(f"{i.user} [{i.user.id}] ran `reload` slash command")
-        if not self.bot.is_owner(i.user):
-            logging.info(f"{i.user} [{i.user.id}] failed `reload` slash command for: FAILED PERMISSION CHECK")
-            await i.response.send_message("You don't have permission to do that!\n```REQUIRES: bot.owner.id```", ephemeral=True)
-            return
-        await i.response.defer(thinking=True, ephemeral=False)
-        await Log.info(self.bot, "Reloading cogs...", i.user)
-        await i.followup.send(content="Reloading cogs...", ephemeral=True)
-        await self.safe_restart()
-
 
     @app_commands.command(name="export-logs")
     async def exportLogs(self, i:discord.Interaction):
@@ -146,8 +135,6 @@ class mainCog(commands.Cog):
             return
         
         await i.response.defer(thinking=True, ephemeral=False)
-        await Log.info(self.bot, "Ran export-logs command", i.user)
-        logging.info("Exporting logs...", i.user)
         try:
             await i.user.send(files=[discord.File('./data/logs/kisb.log'), discord.File('./data/logs/kisb.log.old')])
         except discord.Forbidden:
@@ -171,7 +158,6 @@ class mainCog(commands.Cog):
             return
         
         await i.response.defer(ephemeral=False, thinking=True)
-        await Log.info(self.bot, "Ran debug command", i.user)
         try:
             await i.followup.send(files=[discord.File('./cache/cache'), discord.File('./data/database/database.json')], ephemeral=False)
             logging.debug("Sent debug files")
@@ -191,7 +177,6 @@ class mainCog(commands.Cog):
             await i.response.send_message(f"Oops, Looks like you've caught me while I'm not quite ready yet... Try again in a few seconds. Or, if this continues. Something has gone desperately wrong and you should inform my developer `{self.bot.buildInfo.AUTHOR}`\nQuote this error message: `ERR-MANUALSTATUS-NOCACHE`", ephemeral=False)
             return
         await i.response.defer(thinking=True, ephemeral=True)
-        await Log.info(self.bot, "Ran status command", i.user)
         embeds = self.generate_embeds(False)
         logging.debug(f"Embeds generated for manual status command: {embeds}")
         await i.followup.send(embeds=embeds, ephemeral=True)
@@ -199,7 +184,6 @@ class mainCog(commands.Cog):
 
     @app_commands.command(name="about", description="Get information about the bot")
     async def about(self, i:discord.Interaction):
-        await Log.info(self.bot, "Ran about command", i.user)
         logging.info(f"{i.user} [{i.user.id}] ran `status` slash command")
         await i.response.defer(thinking=True, ephemeral=True)
         embed = discord.Embed(title="About KISB", description=f"Hi, I'm KISB (Kitchen Island Status Bot) I'm a monitoring bot used to display player counts for the KI game servers.\nI'm fully coded from the ground up by my author `{self.bot.buildInfo.AUTHOR}` with some help from a few open source libraries.\nSee my source code at: {self.bot.buildInfo.REPOSITORY}", color=discord.Color.from_str("#4A6F28"))
@@ -217,9 +201,8 @@ class mainCog(commands.Cog):
     @commands.command(name="init-here")
     @commands.is_owner()
     async def initHere(self, ctx:commands.Context):
-        await Log.warn(self.bot, "Initializing!", ctx.author)
-        # await ctx.message.delete()
-        response = await ctx.send("Initializing...")
+        logging.info(f"{ctx.author} [{ctx.author.id}] ran `init-here` command")
+        response = await ctx.send("Initializing...", delete_after=10)
         try:
             OLD_DATA = self.database.read()
 
@@ -227,26 +210,18 @@ class mainCog(commands.Cog):
             old_EMBED_MESSAGE = await old_EMBED_CHANNEL.fetch_message(OLD_DATA["message"]) #type:ignore
             await old_EMBED_MESSAGE.delete()
         except Exception as e:
-            await Log.warn(self.bot, f"Error while deleting old embed: {e}")
             await ctx.send("Error while deleting old embed! Forcing to continue...", delete_after=5)
 
 
         open('./data/database/database.json', 'w').close()
-        await Log.warn(self.bot, "Database reset!")
         open('./cache/cache', 'w').close()
-        await Log.warn(self.bot, "Cache reset!")
         placeholder = discord.Embed(title="Placeholder...")
         message = await ctx.send(embed=placeholder)
-        await Log.warn(self.bot, "Embed created!")
         payload = {
             "message": message.id,
             "channel": message.channel.id,
         }
-        await Log.warn(self.bot, "Writing to database...")
-        await Log.debug(self.bot, str(payload))
         self.database.write(payload)
-        await Log.info(self.bot, "Reloading cogs...")
-        await self.safe_restart()
         await response.edit(content="Done!\n(This message self destructs in 10 seconds)", delete_after=10)
 
 

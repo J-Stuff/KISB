@@ -1,5 +1,4 @@
-import os, schedule, json, time, logging
-from modules.logging import Logging as Log
+import os, json, time, logging
 from .scpsl import SL
 from _kisb import KISB
 
@@ -31,7 +30,10 @@ class DataManager():
     
     @classmethod
     def read_cache(cls) -> dict:
-        return json.load(open(cls.cache_location, 'r'))
+        cache = json.load(open(cls.cache_location, 'r'))
+        logging.debug("Cache Read")
+        logging.debug(cache)
+        return cache
     
     async def _write_cache(self, data:dict) -> None:
         cache = open(self.cache_location, 'w')
@@ -53,7 +55,6 @@ class DataManager():
         logging.debug("Checking if cache has been written...")
         if not self.checkIfCacheExists():
             logging.warn("Cache has not been written!")
-            await Log.warn(self.bot, "Cache has not been written! - TERMINATING")
             raise Exception()
         else:
             logging.debug("Cache has been written!")
@@ -89,18 +90,16 @@ class DataManager():
             bool: True if cache is expired, else false if cache is fresh
         """
         logging.debug("Checking if cache is expired...")
-        await Log.debug(bot, "Checking if cache is expired...")
         cacheExpiry = 20 # Cache Expiry value in seconds DO NOT SET BELOW 20 EVER
-        try:
+        if cls.checkIfCacheExists():
             cache = cls.read_cache()
-        except:
-            await Log.debug(bot, "Cache does not exist or is malformed - TRUE")
-            return True
-        updated = cache['updated']
-        if time.time() - updated >= cacheExpiry:
-            await Log.debug(bot, f"Cache is expired (>= {cacheExpiry}s) - TRUE")
-            return True
+            if time.time() - cache['updated'] > cacheExpiry:
+                logging.debug("Cache is expired - TRUE")
+                return True
+            else:
+                logging.debug("Cache is not expired - FALSE")
+                return False
         else:
-            await Log.debug(bot, f"Cache is still fresh (< {cacheExpiry}s) - FALSE")
-            return False
+            logging.debug("Cache does not exist - TRUE")
+            return True
         

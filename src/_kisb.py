@@ -7,7 +7,7 @@ cogs = [
 ]
 
 class Build(StrEnum):
-    VERSION = "1.1.5"
+    VERSION = "1.2.0"
     DATE = "29.10.2023"
     AUTHOR = "J Stuff"
     REPOSITORY = "https://github.com/J-Stuff/KISB"
