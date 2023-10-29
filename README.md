@@ -1,4 +1,3 @@
-# example-package
 # KISB - Kitchen Island Status Bot
 ## What is this?
 This is a bot that will post the status of the KI Network to a Discord embed. As well as using a custom command to post the status of the KI Network in response to a command.
