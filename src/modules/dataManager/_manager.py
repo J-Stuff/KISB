@@ -13,6 +13,21 @@ class DataManager():
         if self.scpslid is None or self.scpslkey is None:
             exit("SCPSL_ID or SCPSL_KEY is not defined in system environment variables!")
 
+    @staticmethod
+    def checkIfCacheExists() -> bool:
+        """Check if the internal cache exists or not
+
+        Returns:
+            bool: True if cache exists, else false if cache does not exist
+        """
+        logging.debug("Checking if cache exists...")
+        if os.path.exists(DataManager.cache_location):
+            logging.debug("Cache exists - TRUE")
+            return True
+        else:
+            logging.debug("Cache does not exist - FALSE")
+            return False
+
     
     @classmethod
     def read_cache(cls) -> dict:
@@ -31,8 +46,17 @@ class DataManager():
         logging.debug("Attempting to update cache...")
         
         scpsl = await SL.fetch(self.bot, self.scpslid, self.scpslkey)
-
+        logging.debug("New Data Fetched!")
         await self._write_cache({"sl": scpsl, "updated": time.time()})
+        logging.debug("Cache Updated!")
+
+        logging.debug("Checking if cache has been written...")
+        if not self.checkIfCacheExists():
+            logging.warn("Cache has not been written!")
+            await Log.warn(self.bot, "Cache has not been written! - TERMINATING")
+            raise Exception()
+        else:
+            logging.debug("Cache has been written!")
 
     @staticmethod
     def lock(toggle:bool):

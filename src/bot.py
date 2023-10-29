@@ -111,7 +111,7 @@ class mainCog(commands.Cog):
         while DM.lock_check():
             logging.info("LOCKED! Waiting 1 second...")
             await asyncio.sleep(1)
-        if not os.path.exists('./cache/cache'):
+        if not DM.checkIfCacheExists():
             logging.info("Cache doesn't exist! Skipping...")
             return
         embeds = self.generate_embeds(True)
