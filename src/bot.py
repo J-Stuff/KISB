@@ -62,7 +62,7 @@ class mainCog(commands.Cog):
         slServers = cache['sl']['Servers']
         logging.debug(f"SL Server Data: {slServers}")
         
-        slEmbed = discord.Embed(title="Server List", description="Connect: `via the server list`", color=discord.Color.blurple(), timestamp=datetime.datetime.fromtimestamp(cache['updated']))
+        slEmbed = discord.Embed(title="SCP:SL Server Stats", description="Connect: `via the server list`", color=discord.Color.blurple(), timestamp=datetime.datetime.fromtimestamp(cache['updated']))
         slEmbed.set_author(name="KISB", url="https://github.com/J-Stuff/KISB")
         slEmbed.set_thumbnail(url="https://cdn.discordapp.com/attachments/1136583178191114270/1136583568475291648/vn5K5O6d_400x400.jpg")
         if updateNotice:
