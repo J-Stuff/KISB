@@ -77,18 +77,24 @@ class mainCog(commands.Cog):
                 logging.debug(f"Skipping server: {server['ID']}")
                 continue
             logging.debug(f"Continuing with server: {server['ID']}")
-
-            playercount = Fraction(server['Players']).as_integer_ratio()
             serverID = str(server['ID'])
             name = SL_TRANSLATIONS[serverID]
+
+            try:
+                if not server['Online']:
+                    slEmbed.add_field(name=name, value="<:NoConnection:1136504297853550744> - `Offline`", inline=False)
+                    continue
+            except KeyError:
+                logging.warn(f"KeyError while processing server: {server['ID']} - {server}")
+                continue
+
+            playercount = Fraction(server['Players']).as_integer_ratio()
+            
             if playercount[0] >= playercount[1] and server['Online']:
                 slEmbed.add_field(name=name, value=f"<:ServerFull:1137640034439286826> - `{server['Players']} Players Online`", inline=False)
             
             elif playercount[0] < playercount[1] and server['Online']:
                 slEmbed.add_field(name=name, value=f"<:HighConnection:1136504263204421732> - `{server['Players']} Players Online`", inline=False)
-            
-            elif not server['Online']:
-                slEmbed.add_field(name=name, value="<:NoConnection:1136504297853550744> - `Offline`", inline=False)
 
         embeds.append(slEmbed)
 
