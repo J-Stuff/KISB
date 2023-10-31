@@ -7,7 +7,7 @@ cogs = [
 ]
 
 class Build(StrEnum):
-    VERSION = "1.2.1"
+    VERSION = "1.2.2"
     DATE = "31.10.2023"
     AUTHOR = "J Stuff"
     REPOSITORY = "https://github.com/J-Stuff/KISB"
@@ -30,5 +30,3 @@ class KISB(commands.Bot):
         for cog in self.cogList:
             logging.info(f"Loading cog: {cog}")
             await self.load_extension(f"{cog}")
-
-
