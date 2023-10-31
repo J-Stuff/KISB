@@ -31,10 +31,12 @@ def start(bot:KISB):
 
 def updater(bot:KISB):
     logging.debug("Updater Run")
-    asyncio.run(DataManager(bot).update_cache())
-
+    try:
+        asyncio.run(DataManager(bot).update_cache())
+    except Exception as e:
+        logging.error(f"Updater Error:\n {e}")
 def runner():
     while True:
-        # logging.debug("Updater Timer Run") # DO NOT ENABLE THIS OR YOUR LOGS WILL BE SPAMMED
+        # logging.debug("Updater Timer Run") # Do not enable in prod
         schedule.run_pending()
         time.sleep(1)
