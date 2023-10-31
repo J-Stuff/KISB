@@ -6,6 +6,17 @@ This is a bot that will post the status of the KI Network to a Discord embed. As
 - JStuffNZ - Main Developer
 
 
+## Codebase
+
+```
+.
+├── .github   // Github related files.
+|   └── workflows
+|       └── docker-publish.yml   // Github Action to publish to Github Packages.
+├── scripts   // Scripts needed for development.
+└──src      // Source code.
+```
+
 ## Version: 
 - 1.2.3
 
