@@ -109,7 +109,7 @@ class mainCog(commands.Cog):
     
 
 
-    @tasks.loop(seconds=60)
+    @tasks.loop(seconds=20) # Don't set this below 20 seconds
     async def updateEmbed(self):
         logging.info("Updating embed...")
         while DM.lock_check():
