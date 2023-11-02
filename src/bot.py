@@ -135,7 +135,7 @@ class mainCog(commands.Cog):
     @app_commands.command(name="export-logs")
     async def exportLogs(self, i:discord.Interaction):
         logging.info(f"{i.user} [{i.user.id}] ran `export-logs` slash command")
-        if not self.bot.is_owner(i.user):
+        if not await self.bot.is_owner(i.user):
             logging.info(f"{i.user} [{i.user.id}] failed `export-logs` slash command for: FAILED PERMISSION CHECK")
             await i.response.send_message("You don't have permission to do that!\n```REQUIRES: bot.owner.id```", ephemeral=True)
             return
@@ -158,7 +158,7 @@ class mainCog(commands.Cog):
     @app_commands.command(name='debug')
     async def debug(self, i:discord.Interaction):
         logging.info(f"{i.user} [{i.user.id}] ran `debug` slash command")
-        if not self.bot.is_owner(i.user):
+        if not await self.bot.is_owner(i.user):
             logging.info(f"{i.user} [{i.user.id}] failed `debug` slash command for: FAILED PERMISSION CHECK")
             await i.response.send_message("You don't have permission to do that!\n```REQUIRES: bot.owner.id```", ephemeral=True)
             return
@@ -178,7 +178,7 @@ class mainCog(commands.Cog):
     @app_commands.command(name="status", description="Get the status of the servers")
     async def status(self, i:discord.Interaction):
         logging.info(f"{i.user} [{i.user.id}] ran `status` slash command")
-        if not os.path.exists('./cache/cache'):
+        if not DM.checkIfCacheExists():
             logging.warn("Cache doesn't exist! Skipping...")
             await i.response.send_message(f"Oops, Looks like you've caught me while I'm not quite ready yet... Try again in a few seconds. Or, if this continues. Something has gone desperately wrong and you should inform my developer `{self.bot.buildInfo.AUTHOR}`\nQuote this error message: `ERR-MANUALSTATUS-NOCACHE`", ephemeral=False)
             return
@@ -211,13 +211,11 @@ class mainCog(commands.Cog):
         response = await ctx.send("Initializing...", delete_after=10)
         try:
             OLD_DATA = self.database.read()
-
             old_EMBED_CHANNEL = await self.bot.fetch_channel(OLD_DATA["channel"])
             old_EMBED_MESSAGE = await old_EMBED_CHANNEL.fetch_message(OLD_DATA["message"]) #type:ignore
             await old_EMBED_MESSAGE.delete()
         except Exception as e:
             await ctx.send("Error while deleting old embed! Forcing to continue...", delete_after=5)
-
 
         open('./data/database/database.json', 'w').close()
         open('./cache/cache', 'w').close()
