@@ -124,9 +124,13 @@ class mainCog(commands.Cog):
         except:
             logging.warn("Database read failed! The bot probably hasn't been initialized yet.")
             return
-        CHANNEL = await self.bot.fetch_channel(data['channel'])
-        MESSAGE = await CHANNEL.fetch_message(data['message']) #type:ignore
-        await MESSAGE.edit(embeds=embeds)
+        try:
+            CHANNEL = await self.bot.fetch_channel(data['channel'])
+            MESSAGE = await CHANNEL.fetch_message(data['message']) #type:ignore
+            await MESSAGE.edit(embeds=embeds)
+        except Exception as e:
+            logging.warn("Something went wrong when trying to update the embed, I'll try again when the next schedule runs.")
+            logging.warn(e)
 
 
 

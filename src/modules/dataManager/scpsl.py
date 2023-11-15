@@ -27,9 +27,6 @@ class SL():
     async def fetch(cls, bot:KISB, id:str, key:str) -> dict|typing.Literal["OFFLINE"]:
         """Fetch the SCP:SL server info.
 
-        Raises:
-            Any raised exception will terminate the bot.
-
         Returns:
             dict: Raw SL response
         """
