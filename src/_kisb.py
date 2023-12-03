@@ -3,12 +3,14 @@ from discord.ext import commands
 from enum import StrEnum
 
 cogs = [
-    'bot'
+    'bot',
+    'modules.commands.user',
+    'modules.commands.admin',
 ]
 
 class Build(StrEnum):
-    VERSION = "1.2.5"
-    DATE = "15.11.2023"
+    VERSION = "1.2.6"
+    DATE = "3.12.2023"
     AUTHOR = "J Stuff"
     REPOSITORY = "https://github.com/J-Stuff/KISB"
 

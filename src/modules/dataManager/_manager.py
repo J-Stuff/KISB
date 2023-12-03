@@ -80,11 +80,8 @@ class DataManager():
     
     
     @classmethod
-    async def checkIfCacheExpired(cls, bot:KISB) -> bool:
+    async def checkIfCacheExpired(cls) -> bool:
         """Check if the internal cache is expired or not
-
-        Args:
-            bot (KISB): Bot
 
         Returns:
             bool: True if cache is expired, else false if cache is fresh
