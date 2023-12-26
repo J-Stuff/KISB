@@ -2,15 +2,18 @@ import asyncio, os, threading, logging, schedule, time
 from ._manager import DataManager
 from _kisb import KISB
 
-LOCK = "./cache/UPDATER.lock"
+LOCK = "./cache/locks/UPDATER.lock"
 
+# STOP! Should only be used to tell if the updater thread is already running!
 def _lock_check() -> bool:
+    """STOP! Should only be used to tell if the updater thread is already running!"""
     if os.path.exists(LOCK):
         return True
     else:
         return False
     
 def _lock(toggle:bool):
+    """STOP! Should only be used to tell if the updater thread is already running!"""
     if toggle:
         if not os.path.exists(LOCK):
             open(LOCK, 'w').close()
@@ -22,19 +25,21 @@ def start(bot:KISB):
     logging.debug("Starting Updater")
     if not _lock_check():
         _lock(True)
-        threading.Thread(target=updater, args=[bot]).start() # Give the bot an initial cache
-        schedule.every(60).seconds.do(updater, bot) # Update the cache every 60 seconds
-        threading.Thread(target=runner).start()
+        threading.Thread(target=_updater, args=[bot]).start() # Give the bot an initial cache
+
+        schedule.every(60).seconds.do(_updater, bot) # Update the cache every 60 seconds - Prepare the updater clock
+        threading.Thread(target=runner).start() # Start the updater clock
     else:
         logging.debug("Updater is already running!")
         return
 
-def updater(bot:KISB):
+def _updater(bot:KISB):
     logging.debug("Updater Run")
     try:
         asyncio.run(DataManager(bot).update_cache())
     except Exception as e:
         logging.error(f"Updater Error:\n {e}")
+
 def runner():
     while True:
         # logging.debug("Updater Timer Run") # Do not enable in prod

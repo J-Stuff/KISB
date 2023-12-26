@@ -9,7 +9,8 @@ class AdminCommands(commands.Cog):
     def __init__(self, bot:KISB) -> None:
         self.bot = bot
         super().__init__()
-        # ==== ADMIN SLASH COMMANDS ====
+    
+    # ==== ADMIN SLASH COMMANDS ====
 
     @app_commands.command(name="export-logs")
     async def exportLogs(self, i:discord.Interaction):

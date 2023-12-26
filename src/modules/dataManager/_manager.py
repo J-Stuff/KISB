@@ -4,6 +4,7 @@ from _kisb import KISB
 
 
 class DataManager():
+    LOCK = "./cahce/locks/API_DATA.lock"
     cache_location = './cache/CACHE'
     def __init__(self, bot:KISB) -> None:
         self.bot = bot
@@ -54,49 +55,31 @@ class DataManager():
 
         logging.debug("Checking if cache has been written...")
         if not self.checkIfCacheExists():
-            logging.warn("Cache has not been written!")
+            logging.exception("Cache has not been written!")
             raise Exception()
         else:
             logging.debug("Cache has been written!")
 
-    @staticmethod
-    def lock(toggle:bool):
-        LOCKFILE = './cache/kisb.lock'
+    
+    # STOP! This should only be used to lock reads from the database while it is updating
+    @classmethod
+    def lock(cls, toggle:bool):
+        """STOP! This should only be used to lock reads from the database while it is updating"""
         if toggle:
-            if not os.path.exists(LOCKFILE):
-                open(LOCKFILE, 'w').close()
+            if not os.path.exists(cls.LOCK):
+                open(cls.LOCK, 'w').close()
         else:
-            if os.path.exists(LOCKFILE):
-                os.remove(LOCKFILE)
+            if os.path.exists(cls.LOCK):
+                os.remove(cls.LOCK)
 
-    @staticmethod
-    def lock_check() -> bool:
-        LOCKFILE = './cache/kisb.lock'
-        if os.path.exists(LOCKFILE):
+    @classmethod
+    def lock_check(cls) -> bool:
+        """STOP! This should only be used to lock reads from the database while it is updating"""
+        if os.path.exists(cls.LOCK):
             return True
         else:
             return False
 
     
-    
-    @classmethod
-    async def checkIfCacheExpired(cls) -> bool:
-        """Check if the internal cache is expired or not
 
-        Returns:
-            bool: True if cache is expired, else false if cache is fresh
-        """
-        logging.debug("Checking if cache is expired...")
-        cacheExpiry = 20 # Cache Expiry value in seconds DO NOT SET BELOW 20 EVER
-        if cls.checkIfCacheExists():
-            cache = cls.read_cache()
-            if time.time() - cache['updated'] > cacheExpiry:
-                logging.debug("Cache is expired - TRUE")
-                return True
-            else:
-                logging.debug("Cache is not expired - FALSE")
-                return False
-        else:
-            logging.debug("Cache does not exist - TRUE")
-            return True
         

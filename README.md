@@ -33,5 +33,9 @@ This is a bot that will post the status of the KI Network to a Discord embed. As
 
 "SCPSL_KEY" - Server Key for the Lobby List API. See https://support.scpslgame.com/article/61
 
+"TZ" - Timezone for the bot. See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones - PLEASE NOTE:
+Some functions should ideally be run overnight when the server is empty. These will run at 0600 (6AM) in the timezone specified.
+See the ./modPlaytimeTracker/_tasks.py/start() function for what and when these tasks are run.
+
 ### Docker Volume Paths
 "/worker/data" - Main Datastore

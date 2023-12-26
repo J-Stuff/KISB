@@ -14,15 +14,22 @@ class Build(StrEnum):
     AUTHOR = "J Stuff"
     REPOSITORY = "https://github.com/J-Stuff/KISB"
 
-IP = ""
+
+class CONFIGS():
+    servers = {
+        "60048": "Official 1",
+        "68070": "Official 2",
+        "70516": "Community Server 3"
+    }
+    owner = 946234576538304603
 
 
 class KISB(commands.Bot):
+    configs = CONFIGS
+    cogList = cogs
+    buildInfo = Build
     def __init__(self):
-        self.cogList = cogs
-        self.buildInfo = Build
         self.uptime = datetime.datetime.now()
-        self.ip = IP
         super().__init__(";", help_command=None, intents=discord.Intents.default())
     
     async def on_ready(self):

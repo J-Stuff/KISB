@@ -15,7 +15,7 @@ class UserCommands(commands.Cog):
 
      # ==== USER SLASH COMMANDS ====
 
-    @app_commands.command(name="status", description="Get the status of the servers")
+    @app_commands.command(name="server-status", description="Get the status of the servers")
     async def status(self, i:discord.Interaction):
         logging.info(f"{i.user} [{i.user.id}] ran `status` slash command")
         if not DM.checkIfCacheExists():

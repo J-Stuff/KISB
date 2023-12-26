@@ -30,7 +30,7 @@ class CustomFunctions():
 
     @staticmethod
     def generate_embeds(updateNotice:bool = False) -> list[discord.Embed]:
-        SL_TRANSLATIONS = {"60048": "Official 1", "68070": "Official 2", "70516":"Community Server 3"} # These need to be the {"SERVER ID": "DISPLAY NAME"}
+        SL_TRANSLATIONS = KISB.configs.servers
 
         def filter_sl_server(ID:int) -> bool:
             logging.debug(f"Filtering server: {ID}")
