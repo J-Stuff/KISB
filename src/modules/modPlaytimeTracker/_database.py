@@ -76,14 +76,14 @@ class Database:
             self.c = self.conn.cursor()
             self.c.execute("""CREATE TABLE IF NOT EXISTS mods (
                 "game_id"	            TEXT NOT NULL UNIQUE,
-                "last_nick"	            TEXT,
+                "last_nick"	            TEXT NOT NULL,
                 "discord_id"         	TEXT NOT NULL UNIQUE,
-                "last_seen"	            INTEGER,
-                "playtime_today"    	INTEGER,
-                "playtime_this_week"	INTEGER,
-                "playtime_last_week"	INTEGER,
-                "playtime_this_month"	INTEGER,
-                "playtime_last_month"	INTEGER,
+                "last_seen"	            INTEGER NOT NULL,
+                "playtime_today"    	INTEGER NOT NULL,
+                "playtime_this_week"	INTEGER NOT NULL,
+                "playtime_last_week"	INTEGER NOT NULL,
+                "playtime_this_month"	INTEGER NOT NULL,
+                "playtime_last_month"	INTEGER NOT NULL,
                 PRIMARY KEY("game_id")
             )""")
             self.conn.commit()
@@ -93,7 +93,38 @@ class Database:
 
     # Add a moderator to the database
     def add_mod(self, game_id:str, discord_id:str) -> None:
-        self.c.execute("INSERT INTO mods (game_id, discord_id) VALUES (?, ?)", (game_id, discord_id))
+        self.c.execute("INSERT INTO mods (game_id, last_nick, discord_id, last_seen, playtime_today, playtime_this_week, playtime_last_week, playtime_this_month, playtime_last_month) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)", (game_id, "", discord_id, 0, 0, 0, 0, 0, 0))
+        self.conn.commit()
+        return
+
+    # Fetch a user from the database from their game_id
+    def get_mod(self, game_id:str) -> tuple[str, str, str, int, int, int, int, int, int]:
+        """Return data for a mod in the database
+
+        Args:
+            game_id (str): The unique game id of the mod
+
+        Returns:
+            tuple[str, str, str, int, int, int, int, int]: Returns a tuple containing the `game_id, last_nick, discord_id, last_seen, playtime_today, playtime_this_week, playtime_last_week, playtime_this_month, playtime_last_month` in that order
+        """
+        self.c.execute("SELECT * FROM mods WHERE game_id=?", (game_id,))
+        return self.c.fetchone()
+    
+    # Remove a user from the database from their game_id
+    def remove_mod(self, game_id:str) -> None:
+        self.c.execute("DELETE FROM mods WHERE game_id=?", (game_id,))
+        self.conn.commit()
+        return
+    
+    # Update a game_id in the database with a new discord_id
+    def update_mod_discord_id(self, game_id:str, new_discord_id:str) -> None:
+        self.c.execute("UPDATE mods SET discord_id=? WHERE game_id=?", (new_discord_id, game_id))
+        self.conn.commit()
+        return
+    
+    # Update a game_id in the database with a new game_id
+    def update_mod_game_id(self, game_id:str, new_game_id:str) -> None:
+        self.c.execute("UPDATE mods SET game_id=? WHERE game_id=?", (new_game_id, game_id))
         self.conn.commit()
         return
 

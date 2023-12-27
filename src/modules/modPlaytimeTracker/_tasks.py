@@ -48,7 +48,7 @@ def update_online_mods():
             for player in server['PlayersList']:
                 if player['ID'] in mods_ids:
                     logging.info(f"Updating playtime for {player['Nickname']} ({player['ID']})")
-                    DB.add_playtime(player['ID']) # Meta run check is done here
+                    DB.add_playtime(player['ID']) # Meta check is done here
                     DB.update_last_seen(player['ID'])
                     if player["Nickname"] == None:
                         DB.update_last_nick(player['ID'], player['ID'])

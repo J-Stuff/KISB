@@ -31,7 +31,7 @@ class SL():
             dict: Raw SL response
         """
         logging.debug("Fetching SCP:SL Server Info")
-        url = f"https://api.scpslgame.com/serverinfo.php?id={id}&key={key}&players=true&online=true&list=true"
+        url = f"https://api.scpslgame.com/serverinfo.php?id={id}&key={key}&players=true&online=true&list=true&nicknames=true"
         x = requests.get(url)
         if x.status_code == 400:
             logging.warn("[SCP:SL] - Bad request!")
