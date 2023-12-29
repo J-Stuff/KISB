@@ -21,7 +21,9 @@ class CONFIGS():
         "68070": "Official 2",
         "70516": "Community Server 3"
     }
-    owner = 946234576538304603
+    owner = 946234576538304603 # J Stuff
+    admin_roles = []
+    admin_users = [336678934639017985] # [aHarmlessSpoon]
 
 
 class KISB(commands.Bot):

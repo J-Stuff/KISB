@@ -98,7 +98,7 @@ class Database:
         return
 
     # Fetch a user from the database from their game_id
-    def get_mod(self, game_id:str) -> tuple[str, str, str, int, int, int, int, int, int]:
+    def get_mod(self, game_id:str) -> tuple[str, str, str, int, int, int, int, int, int]|None:
         """Return data for a mod in the database
 
         Args:
@@ -108,7 +108,29 @@ class Database:
             tuple[str, str, str, int, int, int, int, int]: Returns a tuple containing the `game_id, last_nick, discord_id, last_seen, playtime_today, playtime_this_week, playtime_last_week, playtime_this_month, playtime_last_month` in that order
         """
         self.c.execute("SELECT * FROM mods WHERE game_id=?", (game_id,))
-        return self.c.fetchone()
+        result = self.c.fetchone()
+        if result is None:
+            return None
+        else:
+            return result
+    
+    # Fetch a user from the database from their discord_id
+    def get_mod_from_discord_id(self, discord_id:str) -> tuple[str, str, str, int, int, int, int, int, int]|None:
+        """Return data for a mod in the database
+
+        Args:
+            discord_id (str): The unique discord id of the mod
+
+        Returns:
+            tuple[str, str, str, int, int, int, int, int]: Returns a tuple containing the `game_id, last_nick, discord_id, last_seen, playtime_today, playtime_this_week, playtime_last_week, playtime_this_month, playtime_last_month` in that order
+        """
+        self.c.execute("SELECT * FROM mods WHERE discord_id=?", (discord_id,))
+        result = self.c.fetchone()
+        if result is None:
+            return None
+        else:
+            return result
+            
     
     # Remove a user from the database from their game_id
     def remove_mod(self, game_id:str) -> None:

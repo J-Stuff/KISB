@@ -11,6 +11,8 @@ class Functions():
     def generate_single_mod_embed(user:str) -> discord.Embed:
         """ Generate an embed for a single mod """
         hit = Database().get_mod(user)
+        if hit is None:
+            return discord.Embed(title="Mod Playtime", color=discord.Color.dark_red(), description="This user is not in the database")
         embed = discord.Embed(title=f"Mod Playtime", color=discord.Color.dark_purple())
         embed.description = f"Showing info for <@{hit[2]}> (`{hit[0]}`)"
        
@@ -87,9 +89,20 @@ class Checks():
 
     # Called Checks
     @staticmethod
+    def is_bot_owner(u:discord.Member):
+        """ STOP! Only pass discord.Member to this and include a check for DMs before this check!"""
+        return u.id == KISB.configs.owner
+
+
+    @staticmethod
+    def is_discord_admin(u:discord.Member):
+        """ STOP! Only pass discord.Member to this and include a check for DMs before this check!"""
+        return u.guild_permissions.administrator
+    
+    @staticmethod
     def is_bot_admin(u:discord.Member):
         """ STOP! Only pass discord.Member to this and include a check for DMs before this check!"""
-        return u.id == KISB.configs.owner or u.guild_permissions.administrator
+        return [KISB.configs.admin_roles.__contains__(role.id) for role in u.roles] or KISB.configs.admin_users.__contains__(u.id)
 
 
 class PlaytimeTracker(commands.Cog):
@@ -97,7 +110,7 @@ class PlaytimeTracker(commands.Cog):
         self.bot = bot
         super().__init__()
 
-    @app_commands.command(name="add-mod", description="Add a user to the database")
+    @app_commands.command(name="add-mod", description="Add a user to the database - Locked to Admins")
     @app_commands.rename(steamID="Game ID", user="Discord User")
     @app_commands.describe(steamID="The game ID (steam64 or northwood ID) of the user you want to add. Example: 76561199055339273@steam", user="The discord user you want to add")
     async def add_user(self, i:discord.Interaction, steamID:str, user:discord.User|discord.Member):
@@ -121,6 +134,9 @@ class PlaytimeTracker(commands.Cog):
         
         if Database().get_all_moderator_game_ids().__contains__(steamID):
             hit = Database().get_mod(steamID)
+            if hit == None:
+                await i.followup.send("This ID is in the database, but the user is not. This should technically never be able to happen but it somehow has. Please contact the bot owner.", ephemeral=False)
+                return
             await i.followup.send(f"""This steam64 is already in the database. If you need to update a user use the `update-mod` slash command.\n
                                     ```\n
                                     Found this user in the Database:\n
@@ -144,7 +160,7 @@ class PlaytimeTracker(commands.Cog):
 
 
 
-    @app_commands.command(name="update-mod", description="Update a user in the database")
+    @app_commands.command(name="update-mod", description="Update a user in the database - Locked to Admins")
     @app_commands.rename(steamID="Game ID")
     async def update_user(self, i:discord.Interaction, steamID:str, new_discord:discord.User|discord.Member|None=None, new_gameID:str|None=None):
         if type(i.channel) == discord.DMChannel:
@@ -178,7 +194,7 @@ class PlaytimeTracker(commands.Cog):
         await i.followup.send("Done! I'll update them the next time they're seen in a server. At the moment this is what their user-profile looks like:", embed=Functions.generate_single_mod_embed(steamID), ephemeral=True)
 
 
-    @app_commands.command(name="remove-mod", description="Remove a user from the database")
+    @app_commands.command(name="remove-mod", description="Remove a user from the database - Locked to Admins")
     @app_commands.rename(steamID="Game ID")
     async def remove_user(self, i:discord.Interaction, steamID:str):
         if type(i.channel) == discord.DMChannel:
@@ -205,3 +221,50 @@ class PlaytimeTracker(commands.Cog):
         
         Database().remove_mod(steamID)
         await i.followup.send("Done! This user will no longer be updated. All their data has been purged from the database.", ephemeral=True)
+
+    
+    @app_commands.command(name="my-playtime", description="Get your playtime - Locked to mods+")
+    @Checks.is_mod()
+    async def my_playtime(self, i:discord.Interaction):
+        if type(i.channel) == discord.DMChannel:
+            await i.response.send_message("This command can only be used in a server", ephemeral=True)
+            return
+        if type (i.user) is not discord.Member:
+            await i.response.send_message("This command can only be used by a server member", ephemeral=True)
+            return
+        
+        await i.response.defer(thinking=True, ephemeral=True)
+        hit = Database().get_mod(str(i.user.id))
+        if hit is None:
+            await i.followup.send("You are not in the database", ephemeral=True)
+            return
+        await i.followup.send(embed=Functions.generate_single_mod_embed(hit[0]), ephemeral=False)
+
+    @my_playtime.error
+    async def my_playtime_error(self, ctx, error):
+        if isinstance(error, commands.CheckFailure):
+            await ctx.send("You do not have permission to use this command", ephemeral=True)
+        else:
+            raise error
+        
+
+    @app_commands.command(name="target-playtime", description="Get a user's playtime - Locked to Admins")
+    @app_commands.rename(user="Discord User")
+    async def target_playtime(self, i:discord.Interaction, user:discord.User|discord.Member):
+        if type(i.channel) == discord.DMChannel:
+            await i.response.send_message("This command can only be used in a server", ephemeral=True)
+            return
+        if type (i.user) is not discord.Member:
+            await i.response.send_message("This command can only be used by a server member", ephemeral=True)
+            return
+        
+        if not Checks.is_bot_admin(i.user):
+            await i.response.send_message("You do not have permission to use this command", ephemeral=True)
+            return
+        
+        await i.response.defer(thinking=True, ephemeral=True)
+        hit = Database().get_mod_from_discord_id(str(user.id))
+        if hit is None:
+            await i.followup.send("This user is not in the database", ephemeral=True)
+            return
+        await i.followup.send(embed=Functions.generate_single_mod_embed(hit[0]), ephemeral=False)
