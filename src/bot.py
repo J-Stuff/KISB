@@ -3,7 +3,7 @@ from discord.ext import commands, tasks
 from _kisb import KISB
 from fractions import Fraction
 from modules.dataManager._manager import DataManager as DM
-from modules.dataManager._loop import start as updater
+from modules.dataManager._loop import start as api_start
 
 
 class CustomFunctions():
@@ -110,7 +110,7 @@ class mainCog(commands.Cog):
     def __init__(self, bot:KISB) -> None:
         logging.debug("Main cog has init-ed")
         self.bot = bot
-        updater(bot)
+        api_start(bot)
         time.sleep(5)
         self.updateEmbed.start()
         super().__init__()

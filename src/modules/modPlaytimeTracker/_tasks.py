@@ -28,7 +28,14 @@ class _Lock():
                 os.remove(cls.MOD_DB_LOCK)
 
 
-def update_online_mods():
+async def stale_warning(bot:KISB):
+    print("Database Stale!!!!")
+    try:
+        await bot.fetch_user(946234576538304603).send("Database Stale!")
+    except Exception as e:
+        logging.error(f"Error sending stale warning: {e}")
+
+def update_online_mods(bot:KISB):
     logging.debug("Updating Online Mods")
     """
     THIS MUST BE RUN ONCE EVERY 60 SECONDS || This function will check it's metadata to ensure it is not run too much
@@ -37,9 +44,15 @@ def update_online_mods():
         time.sleep(1)
     try:
         latest_data = DM.read_cache()['sl']
+        last_updated = DM.read_cache()['updated']
     except Exception as e:
         logging.error(f"Error reading cache: {e}")
         return
+    
+    if last_updated < time.time() - 60:
+        logging.critical("Cache is stale!")
+        return
+    
     SL_TRANSLATIONS = KISB.configs.servers
     DB = Database()
     mods_ids = DB.get_all_moderator_game_ids()
@@ -85,19 +98,19 @@ def month_tickover_runner():
 
 
 
-def start():
+def start(bot:KISB):
     logging.info("Starting Playtime Tracker")
     if _Lock.mod_updater_lock_check():
         logging.info("Playtime Tracker is already running!")
         return
     _Lock.mod_updater_lock(True)
     
-    threading.Thread(target=update_online_mods).start() # Update the db initially
+    threading.Thread(target=update_online_mods, args=[bot]).start() # Update the db initially
 
-    schedule.every(60).seconds.do(update_online_mods) # Update the db every 60 seconds - Prepare the updater clock
+    schedule.every(60).seconds.do(update_online_mods, bot) # Update the db every 60 seconds - Prepare the updater clock
     schedule.every().day.at("06:00").do(day_tickover_runner) # Run the day tickover at 6:00AM
     schedule.every().monday.at("06:00").do(week_tickover_runner) # Run the week tickover at 6:00AM on Monday
-    schedule.every().day.at("06:00").do(month_tickover_runner) # Run the month tickover at 6:00AM 
+    schedule.every().day.at("06:00").do(month_tickover_runner) # Run the month tickover at 6:00AM every day (Checks for the 1st of the month in the function)
     threading.Thread(target=runner).start() # Start the updater clock
 
 
