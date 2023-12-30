@@ -1,7 +1,7 @@
 import time, logging, threading, schedule, os, datetime
 
-from dataManager._manager import DataManager as DM
-from modPlaytimeTracker._database import Database
+from modules.dataManager._manager import DataManager as DM
+from modules.modPlaytimeTracker._database import Database
 from _kisb import KISB
 logger = logging.getLogger("main")
 

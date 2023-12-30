@@ -39,6 +39,27 @@ def init_logging():
             log_fmt = self.FORMATS.get(record.levelno)
             formatter = logging.Formatter(log_fmt)
             return formatter.format(record)
+        
+    # Basically the same as the formatter above but without the colors
+    class CustomFileFormatter(logging.Formatter):
+        if logLevel == logging.DEBUG:
+            FORMAT = '[%(asctime)s]  [%(funcName)s @ %(module)s] %(message)s'
+        else:
+            FORMAT = '[%(asctime)s] %(message)s'
+        FORMATS = {
+            logging.DEBUG: "[%(levelname)s] - " + FORMAT,
+            logging.INFO: "[%(levelname)s] - " + FORMAT,
+            logging.WARNING: "[%(levelname)s] - " + FORMAT,
+            logging.ERROR: "[%(levelname)s] - " + FORMAT,
+            logging.CRITICAL: "[%(levelname)s] - " + FORMAT
+        }
+
+        def format(self, record: LogRecord) -> str:
+            log_fmt = self.FORMATS.get(record.levelno)
+            formatter = logging.Formatter(log_fmt)
+            return formatter.format(record)
+        
+
 
     logger = logging.getLogger("main")
     logger.setLevel(logLevel)
@@ -57,7 +78,7 @@ def init_logging():
 
     fileHandler = logging.FileHandler(filename='./data/logs/kisb.log', encoding='utf-8', mode='w')
     fileHandler.setLevel(logLevel)
-    fileHandler.setFormatter(CustomFormatter())
+    fileHandler.setFormatter(CustomFileFormatter())
     logger.addHandler(fileHandler)
 
     logger.debug("Debug mode enabled")
