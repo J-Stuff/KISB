@@ -2,7 +2,8 @@ from discord.ext import commands
 from _kisb import KISB
 from discord import app_commands
 from ._database import Database
-import discord, typing, logging
+from ._tasks import start
+import discord, typing, logging, time
 
 logger = logging.getLogger("main")
 
@@ -121,6 +122,9 @@ class ModPlaytimeTracker(commands.Cog):
     def __init__(self, bot:KISB) -> None:
         self.bot = bot
         logger.debug("ModPlaytimeTracker cog has init-ed")
+        time.sleep(5)
+        start()
+        logger.debug("ModPlaytimeTracker tasks have started")
         super().__init__()
 
     @app_commands.command(name="add-mod", description="Add a user to the database - Locked to Admins")

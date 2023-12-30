@@ -100,7 +100,7 @@ def month_tickover_runner():
 
 
 
-def start(bot:KISB):
+def start():
     logger.info("Starting Playtime Tracker")
     if _Lock.mod_updater_lock_check():
         logger.info("Playtime Tracker is already running!")

@@ -92,3 +92,6 @@ class AdminCommands(commands.Cog):
 
 
 
+async def setup(bot:KISB):
+    await bot.add_cog(AdminCommands(bot))
+    logger.info("User commands loaded!")
