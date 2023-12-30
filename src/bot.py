@@ -110,6 +110,7 @@ class mainCog(commands.Cog):
     def __init__(self, bot:KISB) -> None:
         logger.debug("Main cog has init-ed")
         self.bot = bot
+        logger.debug("Starting API...")
         api_start(bot)
         time.sleep(5)
         self.updateEmbed.start()

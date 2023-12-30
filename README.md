@@ -33,7 +33,7 @@ This is a bot that will post the status of the KI Network to a Discord embed. As
 | SCPSL_ID | Server ID for the Lobby List API. See https://support.scpslgame.com/article/61 | `None` |
 | SCPSL_KEY | Server Key for the Lobby List API. See https://support.scpslgame.com/article/61 | `None` |
 | TZ | Timezone for the bot. See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones | `Pacific/Auckland` |
-| LOG_LEVEL | Logging level for the bot. Can be either `info` or `debug` | `info` |
+| LOGGING_LEVEL | Logging level for the bot. Can be either `info` or `debug` | `info` |
 
 
 

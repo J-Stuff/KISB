@@ -128,7 +128,7 @@ class ModPlaytimeTracker(commands.Cog):
         super().__init__()
 
     @app_commands.command(name="add-mod", description="Add a user to the database - Locked to Admins")
-    @app_commands.rename(steamID="Game ID", user="Discord User")
+    @app_commands.rename(steamID="game-id", user="discord-user")
     @app_commands.describe(steamID="The game ID (steam64 or northwood ID) of the user you want to add. Example: 76561199055339273@steam", user="The discord user you want to add")
     async def add_user(self, i:discord.Interaction, steamID:str, user:discord.User|discord.Member):
         logger.info(f"{i.user} [{i.user.id}] ran `add-mod` slash command: {steamID}")
@@ -188,7 +188,7 @@ class ModPlaytimeTracker(commands.Cog):
 
 
     @app_commands.command(name="update-mod", description="Update a user in the database - Locked to Admins")
-    @app_commands.rename(steamID="Game ID")
+    @app_commands.rename(steamID="game-id")
     async def update_user(self, i:discord.Interaction, steamID:str, new_discord:discord.User|discord.Member|None=None, new_gameID:str|None=None):
         logger.info(f"{i.user} [{i.user.id}] ran `update-mod` slash command: {steamID}")
         if type(i.channel) == discord.DMChannel:
@@ -232,7 +232,7 @@ class ModPlaytimeTracker(commands.Cog):
 
 
     @app_commands.command(name="remove-mod", description="Remove a user from the database - Locked to Admins")
-    @app_commands.rename(steamID="Game ID")
+    @app_commands.rename(steamID="game-id")
     async def remove_user(self, i:discord.Interaction, steamID:str):
         logger.info(f"{i.user} [{i.user.id}] ran `remove-mod` slash command: {steamID}")
         if type(i.channel) == discord.DMChannel:
@@ -301,7 +301,7 @@ class ModPlaytimeTracker(commands.Cog):
         
 
     @app_commands.command(name="target-playtime", description="Get a user's playtime - Locked to Admins")
-    @app_commands.rename(user="Discord User")
+    @app_commands.rename(user="discord-user")
     async def target_playtime(self, i:discord.Interaction, user:discord.User|discord.Member):
         logger.info(f"{i.user} [{i.user.id}] ran `target-playtime` slash command: {user}")
         if type(i.channel) == discord.DMChannel:
