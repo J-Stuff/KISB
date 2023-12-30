@@ -4,7 +4,7 @@ from _kisb import KISB
 from fractions import Fraction
 from modules.dataManager._manager import DataManager as DM
 from modules.dataManager._loop import start as api_start
-
+logger = logging.getLogger("main")
 
 class CustomFunctions():
 
@@ -15,14 +15,14 @@ class CustomFunctions():
         
         @classmethod
         def read(cls) -> dict:
-            logging.debug("DATABASE READ CALLED")
+            logger.debug("DATABASE READ CALLED")
             with open(cls.database_location, 'r') as db:
                 return json.load(db)
         
 
         @classmethod
         def write(cls, data:dict) -> None:
-            logging.debug(f"DATABASE WRITE CALLED! - {data}")
+            logger.debug(f"DATABASE WRITE CALLED! - {data}")
             with open(cls.database_location, 'w') as db:
                 json.dump(data, db)
 
@@ -33,27 +33,27 @@ class CustomFunctions():
         SL_TRANSLATIONS = KISB.configs.servers
 
         def filter_sl_server(ID:int) -> bool:
-            logging.debug(f"Filtering server: {ID}")
+            logger.debug(f"Filtering server: {ID}")
             if str(ID) in SL_TRANSLATIONS.keys():
-                logging.debug(f"Server {ID} is in the list!")
+                logger.debug(f"Server {ID} is in the list!")
                 return True
             else:
-                logging.debug(f"Server {ID} is not in the list!")
+                logger.debug(f"Server {ID} is not in the list!")
                 return False
             
 
 
-        logging.info("Generating embeds...")
-        logging.debug(f"Showing Live update Notice: {updateNotice}")
+        logger.info("Generating embeds...")
+        logger.debug(f"Showing Live update Notice: {updateNotice}")
         cache = DM.read_cache()
-        logging.debug(f"Cache read! - {cache}")
+        logger.debug(f"Cache read! - {cache}")
         embeds = []
         
 
         # SL Embed Processing
-        logging.debug("Processing SL Embed...")
+        logger.debug("Processing SL Embed...")
         slServers = cache['sl']['Servers']
-        logging.debug(f"SL Server Data: {slServers}")
+        logger.debug(f"SL Server Data: {slServers}")
         
         slEmbed = discord.Embed(title="SCP:SL Server Stats", description="Connect: `via the server list`", color=discord.Color.blurple(), timestamp=datetime.datetime.fromtimestamp(cache['updated']))
         slEmbed.set_author(name="KISB", url="https://github.com/J-Stuff/KISB")
@@ -62,14 +62,14 @@ class CustomFunctions():
             slEmbed.set_footer(text="Updates every Minute - Last Updated")
         else:
             slEmbed.set_footer(text="Last updated")
-        logging.debug("SL Main Embed Created! Starting work on dynamic data...")
+        logger.debug("SL Main Embed Created! Starting work on dynamic data...")
 
         for server in slServers:
-            logging.debug(f"Processing Server: {server['ID']}")
+            logger.debug(f"Processing Server: {server['ID']}")
             if not filter_sl_server(server['ID']):
-                logging.debug(f"Skipping server: {server['ID']}")
+                logger.debug(f"Skipping server: {server['ID']}")
                 continue
-            logging.debug(f"Continuing with server: {server['ID']}")
+            logger.debug(f"Continuing with server: {server['ID']}")
             serverID = str(server['ID'])
             name = SL_TRANSLATIONS[serverID]
 
@@ -78,7 +78,7 @@ class CustomFunctions():
                     slEmbed.add_field(name=name, value="<:NoConnection:1136504297853550744> - `Offline`", inline=False)
                     continue
             except KeyError:
-                logging.warn(f"KeyError while processing server: {server['ID']} - {server}")
+                logger.warn(f"KeyError while processing server: {server['ID']} - {server}")
                 continue
 
             playercount = Fraction(server['Players']).as_integer_ratio()
@@ -91,14 +91,14 @@ class CustomFunctions():
 
         embeds.append(slEmbed)
 
-        logging.info("All Done! Number of embeds: " + str(len(embeds)))
+        logger.info("All Done! Number of embeds: " + str(len(embeds)))
         return embeds
 
 
     @staticmethod
     # Get the bots gateway ping to discord servers
     async def ping(bot:KISB) -> float:
-        logging.debug("Getting gateway ping...")
+        logger.debug("Getting gateway ping...")
         return round(bot.latency * 1000)
 
 
@@ -108,7 +108,7 @@ class CustomFunctions():
 
 class mainCog(commands.Cog):
     def __init__(self, bot:KISB) -> None:
-        logging.debug("Main cog has init-ed")
+        logger.debug("Main cog has init-ed")
         self.bot = bot
         api_start(bot)
         time.sleep(5)
@@ -120,28 +120,28 @@ class mainCog(commands.Cog):
 
     @tasks.loop(seconds=20) # Don't set this below 20 seconds
     async def updateEmbed(self):
-        logging.info("Updating embed...")
+        logger.info("Updating embed...")
         while DM.lock_check():
-            logging.info("LOCKED! Waiting 1 second...")
+            logger.info("LOCKED! Waiting 1 second...")
             await asyncio.sleep(1)
         if not DM.checkIfCacheExists():
-            logging.info("Cache doesn't exist! The bot likely hasn't finished booting yet...")
+            logger.info("Cache doesn't exist! The bot likely hasn't finished booting yet...")
             return
         embeds = CustomFunctions.generate_embeds(True)
         try:
             data = CustomFunctions.database.read()
         except:
-            logging.warn("Database read failed! The bot probably hasn't been initialized yet.")
+            logger.warn("Database read failed! The bot probably hasn't been initialized yet.")
             return
         try:
             CHANNEL = await self.bot.fetch_channel(data['channel'])
             MESSAGE = await CHANNEL.fetch_message(data['message']) #type:ignore
             await MESSAGE.edit(embeds=embeds)
         except Exception as e:
-            logging.warn("Something went wrong when trying to update the embed, I'll try again when the next schedule runs.")
-            logging.warn(e)
+            logger.warn("Something went wrong when trying to update the embed, I'll try again when the next schedule runs.")
+            logger.warn(e)
         
     
 async def setup(bot:KISB):
     await bot.add_cog(mainCog(bot))
-    logging.info("Cog loaded: Main Cog")
+    logger.info("Cog loaded: Main Cog")

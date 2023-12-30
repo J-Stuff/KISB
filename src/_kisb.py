@@ -2,6 +2,8 @@ import discord, logging, datetime
 from discord.ext import commands
 from enum import StrEnum
 
+logger = logging.getLogger("main")
+
 cogs = [
     'bot',
     'modules.commands.user',
@@ -35,9 +37,10 @@ class KISB(commands.Bot):
         super().__init__(";", help_command=None, intents=discord.Intents.default())
     
     async def on_ready(self):
-        logging.info("KISB is ready!")
-        logging.info(f"Logged in as {self.user}")
-        logging.info("Loading cogs...")
+        logger.info("KISB is ready!")
+        logger.info(f"Logged in as {self.user}")
+        logger.info("Loading cogs...")
         for cog in self.cogList:
-            logging.info(f"Loading cog: {cog}")
+            logger.info(f"Loading cog: {cog}")
             await self.load_extension(f"{cog}")
+            # A log should be made by the cog itself announcing it's loaded

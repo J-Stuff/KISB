@@ -3,6 +3,7 @@ import time, logging, threading, schedule, os, datetime
 from dataManager._manager import DataManager as DM
 from ._database import Database
 from _kisb import KISB
+logger = logging.getLogger("main")
 
 # Lock check for API data
 def data_lock_check() -> bool:
@@ -13,30 +14,30 @@ class _Lock():
 
     @classmethod
     def mod_updater_lock_check(cls) -> bool:
+        logger.debug("Checking for mod updater lock")
         if os.path.exists(cls.MOD_DB_LOCK):
+            logger.debug("Mod updater lock true!")
             return True
         else:
+            logger.debug("Mod updater lock false")
             return False
         
     @classmethod
     def mod_updater_lock(cls, toggle:bool):
+        logger.debug(f"Setting mod updater lock to {toggle}")
         if toggle:
             if not os.path.exists(cls.MOD_DB_LOCK):
                 open(cls.MOD_DB_LOCK, 'w').close()
+                logger.debug("Mod updater lock set!")
         else:
             if os.path.exists(cls.MOD_DB_LOCK):
                 os.remove(cls.MOD_DB_LOCK)
+                logger.debug("Mod updater lock removed!")
 
 
-async def stale_warning(bot:KISB):
-    print("Database Stale!!!!")
-    try:
-        await bot.fetch_user(946234576538304603).send("Database Stale!")
-    except Exception as e:
-        logging.error(f"Error sending stale warning: {e}")
 
-def update_online_mods(bot:KISB):
-    logging.debug("Updating Online Mods")
+def update_online_mods():
+    logger.debug("Updating Online Mods")
     """
     THIS MUST BE RUN ONCE EVERY 60 SECONDS || This function will check it's metadata to ensure it is not run too much
     """
@@ -46,12 +47,13 @@ def update_online_mods(bot:KISB):
         latest_data = DM.read_cache()['sl']
         last_updated = DM.read_cache()['updated']
     except Exception as e:
-        logging.error(f"Error reading cache: {e}")
+        logger.error(f"Error reading cache: {e}")
         return
     
     if last_updated < time.time() - 60:
-        logging.critical("Cache is stale!")
-        return
+        logger.critical("Cache is stale!")
+        exit("Cache is stale!")
+
     
     SL_TRANSLATIONS = KISB.configs.servers
     DB = Database()
@@ -60,7 +62,7 @@ def update_online_mods(bot:KISB):
         if str(server['ID']) in SL_TRANSLATIONS.keys():
             for player in server['PlayersList']:
                 if player['ID'] in mods_ids:
-                    logging.info(f"Updating playtime for {player['Nickname']} ({player['ID']})")
+                    logger.info(f"Updating playtime for {player['Nickname']} ({player['ID']})")
                     DB.add_playtime(player['ID']) # Meta check is done here
                     DB.update_last_seen(player['ID'])
                     if player["Nickname"] == None:
@@ -70,7 +72,7 @@ def update_online_mods(bot:KISB):
 
 def day_tickover_runner():
     """This function should be run every day at 6:00AM"""
-    logging.debug("Running Tickover Check for Day")
+    logger.debug("Running Tickover Check for Day")
     while data_lock_check():
         time.sleep(1)
     DB = Database()
@@ -78,7 +80,7 @@ def day_tickover_runner():
 
 def week_tickover_runner():
     """This function should be run every week at 6:00AM on Monday"""
-    logging.debug("Running Tickover Check for Week")
+    logger.debug("Running Tickover Check for Week")
     while data_lock_check():
         time.sleep(1)
     DB = Database()
@@ -86,11 +88,11 @@ def week_tickover_runner():
 
 def month_tickover_runner():
     """This function should be run every month at 6:00AM on the 1st -- THIS FUNCTION CHECKS THE DATE OF THE MONTH"""
-    logging.debug("Running Tickover Check for Month")
+    logger.debug("Running Tickover Check for Month")
     while data_lock_check():
         time.sleep(1)
     if not datetime.datetime.today().day == 1:
-        logging.debug("Not the 1st of the month! Skipping...")
+        logger.debug("Not the 1st of the month! Skipping...")
         return
     DB = Database()
     DB.tickover_playtime_month()
@@ -99,15 +101,15 @@ def month_tickover_runner():
 
 
 def start(bot:KISB):
-    logging.info("Starting Playtime Tracker")
+    logger.info("Starting Playtime Tracker")
     if _Lock.mod_updater_lock_check():
-        logging.info("Playtime Tracker is already running!")
+        logger.info("Playtime Tracker is already running!")
         return
     _Lock.mod_updater_lock(True)
     
-    threading.Thread(target=update_online_mods, args=[bot]).start() # Update the db initially
+    threading.Thread(target=update_online_mods).start() # Update the db initially
 
-    schedule.every(60).seconds.do(update_online_mods, bot) # Update the db every 60 seconds - Prepare the updater clock
+    schedule.every(60).seconds.do(update_online_mods) # Update the db every 60 seconds - Prepare the updater clock
     schedule.every().day.at("06:00").do(day_tickover_runner) # Run the day tickover at 6:00AM
     schedule.every().monday.at("06:00").do(week_tickover_runner) # Run the week tickover at 6:00AM on Monday
     schedule.every().day.at("06:00").do(month_tickover_runner) # Run the month tickover at 6:00AM every day (Checks for the 1st of the month in the function)
@@ -116,6 +118,6 @@ def start(bot:KISB):
 
 def runner():
     while True:
-        # logging.debug("Updater Timer Run") # Do not enable in prod
+        logger.debug("Updater Timer Run") 
         schedule.run_pending()
         time.sleep(1)

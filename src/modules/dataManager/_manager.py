@@ -2,6 +2,7 @@ import os, json, time, logging
 from .scpsl import SL
 from _kisb import KISB
 
+logger = logging.getLogger("main")
 
 class DataManager():
     LOCK = "./cahce/locks/API_DATA.lock"
@@ -20,20 +21,20 @@ class DataManager():
         Returns:
             bool: True if cache exists, else false if cache does not exist
         """
-        logging.debug("Checking if cache exists...")
+        logger.debug("Checking if cache exists...")
         if os.path.exists(DataManager.cache_location):
-            logging.debug("Cache exists - TRUE")
+            logger.debug("Cache exists - TRUE")
             return True
         else:
-            logging.debug("Cache does not exist - FALSE")
+            logger.debug("Cache does not exist - FALSE")
             return False
 
     
     @classmethod
     def read_cache(cls) -> dict:
         cache = json.load(open(cls.cache_location, 'r'))
-        logging.debug("Cache Read")
-        logging.debug(cache)
+        logger.debug("Cache Read")
+        logger.debug(cache)
         return cache
     
     async def _write_cache(self, data:dict) -> None:
@@ -46,19 +47,19 @@ class DataManager():
         if self.scpslid is None or self.scpslkey is None:
             exit("SCPSL_ID or SCPSL_KEY is not defined in system environment variables!")
 
-        logging.debug("Attempting to update cache...")
+        logger.debug("Attempting to update cache...")
         
         scpsl = await SL.fetch(self.bot, self.scpslid, self.scpslkey)
-        logging.debug("New Data Fetched!")
+        logger.debug("New Data Fetched!")
         await self._write_cache({"sl": scpsl, "updated": time.time()})
-        logging.debug("Cache Updated!")
+        logger.debug("Cache Updated!")
 
-        logging.debug("Checking if cache has been written...")
+        logger.debug("Checking if cache has been written...")
         if not self.checkIfCacheExists():
-            logging.exception("Cache has not been written!")
+            logger.exception("Cache has not been written!")
             raise Exception()
         else:
-            logging.debug("Cache has been written!")
+            logger.debug("Cache has been written!")
 
     
     # STOP! This should only be used to lock reads from the database while it is updating

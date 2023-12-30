@@ -1,5 +1,6 @@
 import sqlite3, logging, time, io, json, datetime, typing
 
+logger = logging.getLogger("main")
 '''
 game_id is usually the steam64 id of the user, Except if they are northwood staff, in which case it is "USER@northwood"
 
@@ -88,7 +89,7 @@ class Database:
             )""")
             self.conn.commit()
         except:
-            logging.exception("Failed to connect to database")
+            logger.exception("Failed to connect to database")
             exit("Failed to connect to database")
 
     # Add a moderator to the database
