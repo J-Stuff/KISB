@@ -8,6 +8,7 @@ cogs = [
     'bot',
     'modules.commands.user',
     'modules.commands.admin',
+    'modules.modPlaytimeTracker.discord',
 ]
 
 class Build(StrEnum):

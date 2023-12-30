@@ -1,8 +1,8 @@
 from discord.ext import commands
 from _kisb import KISB
 from discord import app_commands
-from ._database import Database
-from ._tasks import start
+from  modPlaytimeTracker._database import Database
+from  modPlaytimeTracker._tasks import start
 import discord, typing, logging, time
 
 logger = logging.getLogger("main")
