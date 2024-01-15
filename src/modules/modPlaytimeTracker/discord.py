@@ -116,7 +116,7 @@ class Checks():
         """ STOP! Only pass discord.Member to this and include a check for DMs before this check!"""
         result = any([KISB.configs.admin_roles.__contains__(role.id) for role in u.roles]) or KISB.configs.admin_users.__contains__(u.id) or KISB.configs.owner == u.id
         logger.debug(f"Checking if {u} is bot admin: {result}")
-        return 
+        return result
 
 
 class ModPlaytimeTracker(commands.Cog):
