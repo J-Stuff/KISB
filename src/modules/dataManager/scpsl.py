@@ -25,7 +25,7 @@ class SL():
 
 
     @classmethod
-    async def fetch(cls, bot:KISB, id:str, key:str) -> dict|typing.Literal["OFFLINE"]:
+    def fetch(cls, id:str, key:str) -> dict|typing.Literal["OFFLINE"]:
         """Fetch the SCP:SL server info.
 
         Returns:
@@ -34,25 +34,10 @@ class SL():
         logger.debug("Fetching SCP:SL Server Info")
         url = f"https://api.scpslgame.com/serverinfo.php?id={id}&key={key}&players=true&online=true&list=true&nicknames=true"
         x = requests.get(url)
-        if x.status_code == 400:
-            logger.warn("[SCP:SL] - Bad request!")
-            raise cls.Exceptions.BadRequest("Bad request!")
-        elif x.status_code == 401:
-            logger.warn("[SCP:SL] - Bad credentials!")
-            raise cls.Exceptions.BadCredentials("Bad credentials!")
-        elif x.status_code == 404:
-            logger.warn("[SCP:SL] - IP not verified!")
-            raise cls.Exceptions.IPNotVerified("IP not verified!")
-        elif x.status_code == 503:
-            logger.warn("[SCP:SL] - Rate limited!")
-            raise cls.Exceptions.RateLimited("Rate limited!")
-        elif x.status_code != 200:
-            logger.warn(f"[SCP:SL] - Misc error! Status code: {x.status_code}")
-            raise cls.Exceptions.MiscError(f"Misc error! Status code: {x.status_code}")
-        logger.debug(f"[SCP:SL] - Server data fetched successfully! \n {x.text}")
+        logger.debug(f"[SCP:SL] - Server data fetched \n {x.text}")
         servers:dict = json.loads(x.text)
         if servers["Success"] != True:
-            logger.warn(bot, f"[SCP:SL] - Server data fetch was not successful! - `http {x.status_code}`")
+            logger.warn(f"[SCP:SL] - Server data fetch was not successful! - `http {x.status_code}`")
             raise cls.Exceptions.MiscError(f"Misc error! Status code: {x.status_code}")
         
         return servers

@@ -2,7 +2,7 @@ from discord.ext import commands
 from _kisb import KISB
 from discord import app_commands
 from  modules.modPlaytimeTracker._database import Database
-from  modules.modPlaytimeTracker._tasks import start
+from  modules.modPlaytimeTracker._tasks import start as mod_tracker_start
 import discord, typing, logging, time
 
 logger = logging.getLogger("main")
@@ -122,8 +122,8 @@ class ModPlaytimeTracker(commands.Cog):
     def __init__(self, bot:KISB) -> None:
         self.bot = bot
         logger.debug("ModPlaytimeTracker cog has init-ed")
-        time.sleep(5)
-        start()
+        time.sleep(1)
+        mod_tracker_start()
         logger.debug("ModPlaytimeTracker tasks have started")
         super().__init__()
 
@@ -189,7 +189,7 @@ class ModPlaytimeTracker(commands.Cog):
 
     @app_commands.command(name="update-mod", description="Update a user in the database - Locked to Admins")
     @app_commands.rename(steamID="game-id")
-    async def update_user(self, i:discord.Interaction, steamID:str, new_discord:discord.User|discord.Member|None=None, new_gameID:str|None=None):
+    async def update_user(self, i:discord.Interaction, steamID:str, new_discord:discord.User|discord.Member|None=None, new_game_id:str|None=None):
         logger.info(f"{i.user} [{i.user.id}] ran `update-mod` slash command: {steamID}")
         if type(i.channel) == discord.DMChannel:
             await i.response.send_message("This command can only be used in a server", ephemeral=True)
@@ -224,9 +224,9 @@ class ModPlaytimeTracker(commands.Cog):
             Database().update_mod_discord_id(steamID, str(new_discord.id))
             logger.debug(f"Updated discord ID for user {steamID} to {new_discord.id}")
         
-        if new_gameID != None:
-            Database().update_mod_game_id(steamID, new_gameID)
-            logger.debug(f"Updated game ID for user {steamID} to {new_gameID}")
+        if new_game_id != None:
+            Database().update_mod_game_id(steamID, new_game_id)
+            logger.debug(f"Updated game ID for user {steamID} to {new_game_id}")
         
         await i.followup.send("Done! I'll update them the next time they're seen in a server. At the moment this is what their user-profile looks like:", embed=Functions.generate_single_mod_embed(steamID), ephemeral=True)
 

@@ -48,9 +48,8 @@ dependencies = [
     "urllib3==2.0.4",
     "websockets==11.0.3",
     "yarl==1.9.2",
-    "schedule>=1.2.1",
-    "schedule==1.2.0",
     "termcolor>=2.4.0",
+    "schedule>=1.2.1",
 ]
 requires-python = ">=3.11"
 license = {text = "MIT"}

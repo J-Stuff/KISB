@@ -111,7 +111,7 @@ class mainCog(commands.Cog):
         logger.debug("Main cog has init-ed")
         self.bot = bot
         logger.debug("Starting API...")
-        api_start(bot)
+        api_start()
         time.sleep(5)
         self.updateEmbed.start()
         super().__init__()

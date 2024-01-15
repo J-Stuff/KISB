@@ -50,9 +50,8 @@ def update_online_mods():
         logger.error(f"Error reading cache: {e}")
         return
     
-    if last_updated < time.time() - 60:
+    if last_updated < time.time() - 120:
         logger.critical("Cache is stale!")
-        exit("Cache is stale!")
 
     
     SL_TRANSLATIONS = KISB.configs.servers
@@ -118,6 +117,8 @@ def start():
 
 def runner():
     while True:
-        logger.debug("Updater Timer Run") 
+        logger.debug("Updater Timer Run (MODS)") 
         schedule.run_pending()
-        time.sleep(1)
+        sleep_time = schedule.idle_seconds()
+        logger.debug(f"Updater Timer Sleep (MODS): {sleep_time}")
+        time.sleep(sleep_time) #type:ignore

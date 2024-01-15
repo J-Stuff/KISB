@@ -5,7 +5,7 @@
 groups = ["default"]
 strategy = ["cross_platform"]
 lock_version = "4.4.1"
-content_hash = "sha256:0fa17388b85f506d4f86350c3153a8b13eadf6a009ee4ba32e17df105271c86a"
+content_hash = "sha256:83fdc3c74faba9e76a677ef45b03e1025e82e55a4a2795112cb08cff1e9717a8"
 
 [[package]]
 name = "aiohttp"
@@ -524,12 +524,12 @@ files = [
 
 [[package]]
 name = "schedule"
-version = "1.2.0"
+version = "1.2.1"
 requires_python = ">=3.7"
 summary = "Job scheduling for humans."
 files = [
-    {file = "schedule-1.2.0-py2.py3-none-any.whl", hash = "sha256:415908febaba0bc9a7c727a32efb407d646fe994367ef9157d123aabbe539ea8"},
-    {file = "schedule-1.2.0.tar.gz", hash = "sha256:b4ad697aafba7184c9eb6a1e2ebc41f781547242acde8ceae9a0a25b04c0922d"},
+    {file = "schedule-1.2.1-py2.py3-none-any.whl", hash = "sha256:14cdeb083a596aa1de6dc77639a1b2ac8bf6eaafa82b1c9279d3612823063d01"},
+    {file = "schedule-1.2.1.tar.gz", hash = "sha256:843bc0538b99c93f02b8b50e3e39886c06f2d003b24f48e1aa4cadfa3f341279"},
 ]
 
 [[package]]

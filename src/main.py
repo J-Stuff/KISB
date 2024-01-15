@@ -14,9 +14,9 @@ if os.path.exists('./cache/CACHE'):
     logger.debug("Removing CACHE")
     os.remove('./cache/CACHE')
 
-if os.path.exists('./cache/UPDATER.lock'):
+if os.path.exists('./cache/locks/UPDATER.lock'):
     logger.debug("Removing UPDATER.lock")
-    os.remove('./cache/UPDATER.lock')
+    os.remove('./cache/locks/UPDATER.lock')
 
 if os.path.exists('./cache/locks/MOD_UPDATER.lock'):
     logger.debug("Removing MOD_UPDATER.lock")

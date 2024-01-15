@@ -7,8 +7,7 @@ logger = logging.getLogger("main")
 class DataManager():
     LOCK = "./cahce/locks/API_DATA.lock"
     cache_location = './cache/CACHE'
-    def __init__(self, bot:KISB) -> None:
-        self.bot = bot
+    def __init__(self) -> None:
         self.scpslid = os.getenv("SCPSL_ID")
         self.scpslkey = os.getenv("SCPSL_KEY")
         if self.scpslid is None or self.scpslkey is None:
@@ -37,21 +36,21 @@ class DataManager():
         logger.debug(cache)
         return cache
     
-    async def _write_cache(self, data:dict) -> None:
+    def _write_cache(self, data:dict) -> None:
         cache = open(self.cache_location, 'w')
         json.dump(data, cache)
         cache.close()
         return
 
-    async def update_cache(self) -> None:
+    def update_cache(self) -> None:
         if self.scpslid is None or self.scpslkey is None:
             exit("SCPSL_ID or SCPSL_KEY is not defined in system environment variables!")
 
         logger.debug("Attempting to update cache...")
         
-        scpsl = await SL.fetch(self.bot, self.scpslid, self.scpslkey)
+        scpsl = SL.fetch(self.scpslid, self.scpslkey)
         logger.debug("New Data Fetched!")
-        await self._write_cache({"sl": scpsl, "updated": time.time()})
+        self._write_cache({"sl": scpsl, "updated": time.time()})
         logger.debug("Cache Updated!")
 
         logger.debug("Checking if cache has been written...")
