@@ -111,6 +111,7 @@ class Checks():
 
     @staticmethod
     def is_bot_admin(u:discord.Member):
+        """Check if the user is a bot admin. Will also return true if the user is the bot owner"""
         logger.debug(f"Checking if {u} is bot admin")
         """ STOP! Only pass discord.Member to this and include a check for DMs before this check!"""
         result = any([KISB.configs.admin_roles.__contains__(role.id) for role in u.roles]) or KISB.configs.admin_users.__contains__(u.id) or KISB.configs.owner == u.id
