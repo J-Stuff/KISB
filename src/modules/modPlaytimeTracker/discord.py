@@ -44,7 +44,7 @@ class Functions():
             embed.add_field(name="Playtime on KI SCPSL Servers This Week:", value=f"**{hit[5] // 60}:{'%02d' % (hit[5] % 60)}** (`{hit[5]} minutes`)", inline=False)
 
         if hit[6] == 0:
-            embed.add_field(name="Playtime on KI SCPSL Servers Last Week:", value="**This user was not been seen online last week**", inline=False)
+            embed.add_field(name="Playtime on KI SCPSL Servers Last Week:", value="**This user was not seen online last week**", inline=False)
         else:
             embed.add_field(name="Playtime on KI SCPSL Servers Last Week:", value=f"**{hit[6] // 60}:{'%02d' % (hit[6] % 60)}** (`{hit[6]} minutes`)", inline=False)
         
@@ -54,7 +54,7 @@ class Functions():
             embed.add_field(name="Playtime on KI SCPSL Servers This Month:", value=f"**{hit[7] // 60}:{'%02d' % (hit[7] % 60)}** (`{hit[7]} minutes`)", inline=False)
         
         if hit[8] == 0:
-            embed.add_field(name="Playtime on KI SCPSL Servers Last Month:", value="**This user was not been seen online last month**", inline=False)
+            embed.add_field(name="Playtime on KI SCPSL Servers Last Month:", value="**This user was not seen online last month**", inline=False)
         else:
             embed.add_field(name="Playtime on KI SCPSL Servers Last Month:", value=f"**{hit[8] // 60}:{'%02d' % (hit[8] % 60)}** (`{hit[8]} minutes`)", inline=False)
 
