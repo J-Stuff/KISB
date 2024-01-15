@@ -108,8 +108,10 @@ class Database:
         Returns:
             tuple[str, str, str, int, int, int, int, int]: Returns a tuple containing the `game_id, last_nick, discord_id, last_seen, playtime_today, playtime_this_week, playtime_last_week, playtime_this_month, playtime_last_month` in that order
         """
+        logger.debug(f"Fetching mod with game_id: {game_id}")
         self.c.execute("SELECT * FROM mods WHERE game_id=?", (game_id,))
         result = self.c.fetchone()
+        logger.debug(result)
         if result is None:
             return None
         else:
@@ -158,6 +160,11 @@ class Database:
     
     # Get all the discord ids from all moderators in the database and return them as a list
     def get_all_moderator_discord_ids(self) -> list[str]:
+        """Returns a list of all mod ID's (as STRINGS)
+
+        Returns:
+            list[str]: List of all mod ID's in the database
+        """
         self.c.execute("SELECT discord_id FROM mods")
         return [x[0] for x in self.c.fetchall()]
     

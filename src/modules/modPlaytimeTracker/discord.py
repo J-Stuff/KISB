@@ -92,9 +92,18 @@ class Checks():
     @staticmethod
     def is_mod(i:discord.Interaction):
         logger.debug(f"Checking if {i.user} is a mod")
-        result = i.user.id in Database().get_all_moderator_discord_ids()
+        user = i.user
+        if type(user) is not discord.Member:
+            logger.debug("User is not a member")
+            return False
+        mod_ids = Database().get_all_moderator_discord_ids()
+        logger.debug(f"Mod IDs: {mod_ids}")
+        result = str(i.user.id) in mod_ids
         logger.debug(f"Result: {result}")
-        return result
+        if result:
+            return result
+        else:
+            return Checks.is_bot_admin(user)
     
 
     # Called Checks
@@ -127,6 +136,7 @@ class ModPlaytimeTracker(commands.Cog):
         super().__init__()
 
     @app_commands.command(name="add-mod", description="Add a user to the database - Locked to Admins")
+    @app_commands.guild_only()
     @app_commands.rename(steamID="game-id", user="discord-user")
     @app_commands.describe(steamID="The game ID (steam64 or northwood ID) of the user you want to add. Example: 76561199055339273@steam", user="The discord user you want to add")
     async def add_user(self, i:discord.Interaction, steamID:str, user:discord.User|discord.Member):
@@ -188,6 +198,7 @@ class ModPlaytimeTracker(commands.Cog):
 
     @app_commands.command(name="update-mod", description="Update a user in the database - Locked to Admins")
     @app_commands.rename(steamID="game-id")
+    @app_commands.guild_only()
     async def update_user(self, i:discord.Interaction, steamID:str, new_discord:discord.User|discord.Member|None=None, new_game_id:str|None=None):
         logger.info(f"{i.user} [{i.user.id}] ran `update-mod` slash command: {steamID}")
         if type(i.channel) == discord.DMChannel:
@@ -232,6 +243,7 @@ class ModPlaytimeTracker(commands.Cog):
 
     @app_commands.command(name="remove-mod", description="Remove a user from the database - Locked to Admins")
     @app_commands.rename(steamID="game-id")
+    @app_commands.guild_only()
     async def remove_user(self, i:discord.Interaction, steamID:str):
         logger.info(f"{i.user} [{i.user.id}] ran `remove-mod` slash command: {steamID}")
         if type(i.channel) == discord.DMChannel:
@@ -268,6 +280,7 @@ class ModPlaytimeTracker(commands.Cog):
 
     
     @app_commands.command(name="my-playtime", description="Get your playtime - Locked to mods+")
+    @app_commands.guild_only()
     async def my_playtime(self, i:discord.Interaction):
         logger.info(f"{i.user} [{i.user.id}] ran `my-playtime` slash command")
         if type(i.channel) == discord.DMChannel:
@@ -287,7 +300,7 @@ class ModPlaytimeTracker(commands.Cog):
         logger.debug("Passed quick checks")
         await i.response.defer(thinking=True, ephemeral=True)
         logger.debug("Deferring response...")
-        hit = Database().get_mod(str(i.user.id))
+        hit = Database().get_mod_from_discord_id(str(i.user.id))
         if hit is None:
             await i.followup.send("You are not in the database", ephemeral=True)
             logger.info(f"{i.user} [{i.user.id}] failed `my-playtime` slash command for: USER NOT IN DATABASE")
@@ -297,6 +310,7 @@ class ModPlaytimeTracker(commands.Cog):
 
     @app_commands.command(name="target-playtime", description="Get a user's playtime - Locked to Admins")
     @app_commands.rename(user="discord-user")
+    @app_commands.guild_only()
     async def target_playtime(self, i:discord.Interaction, user:discord.User|discord.Member):
         logger.info(f"{i.user} [{i.user.id}] ran `target-playtime` slash command: {user}")
         if type(i.channel) == discord.DMChannel:

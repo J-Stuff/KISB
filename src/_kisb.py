@@ -27,6 +27,7 @@ class CONFIGS():
     owner = 946234576538304603 # J Stuff
     admin_roles = []
     admin_users = [336678934639017985] # [aHarmlessSpoon]
+    guilds = [1136504183948857397, ] # [KI Bakery]
 
 
 class KISB(commands.Bot):
