@@ -15,6 +15,7 @@ class Functions():
         logger.debug(f"Generating mod embed for {user}")
         """ Generate an embed for a single mod """
         hit = Database().get_mod(user)
+        now = time.time()
         if hit is None:
             return discord.Embed(title="Mod Playtime", color=discord.Color.dark_red(), description="This user is not in the database")
         embed = discord.Embed(title=f"Mod Playtime", color=discord.Color.dark_purple())
@@ -27,33 +28,35 @@ class Functions():
 
         if hit[3] == 0:
             embed.add_field(name="Last Seen on a KI SCPSL Server:", value="**This user has not been seen in a server yet**", inline=False)
-        else:
+        elif now - hit[3] > 60:
+            embed.add_field(name="Last Seen on a KI SCPSL Server:", value=":green_circle: Online", inline=False)
+        else:    
             embed.add_field(name="Last Seen on a KI SCPSL Server:", value=f"<t:{hit[3]}:R>", inline=False) 
 
         if hit[4] == 0:
             embed.add_field(name="Playtime on KI SCPSL Servers Today:", value="**This user has not been seen online today**", inline=False)
         else:
-            embed.add_field(name="Playtime on KI SCPSL Servers Today:", value=f"**{hit[4] // 60}:{hit[4] % 60}** (`{hit[4]} minutes`)", inline=False)
+            embed.add_field(name="Playtime on KI SCPSL Servers Today:", value=f"**{hit[4] // 60}:{'%02d' % (hit[4] % 60)}** (`{hit[4]} minutes`)", inline=False)
         
         if hit[5] == 0:
             embed.add_field(name="Playtime on KI SCPSL Servers This Week:", value="**This user has not been seen online this week**", inline=False)
         else:
-            embed.add_field(name="Playtime on KI SCPSL Servers This Week:", value=f"**{hit[5] // 60}:{hit[5] % 60}** (`{hit[5]} minutes`)", inline=False)
+            embed.add_field(name="Playtime on KI SCPSL Servers This Week:", value=f"**{hit[5] // 60}:{'%02d' % (hit[5] % 60)}** (`{hit[5]} minutes`)", inline=False)
 
         if hit[6] == 0:
             embed.add_field(name="Playtime on KI SCPSL Servers Last Week:", value="**This user has not been seen online last week**", inline=False)
         else:
-            embed.add_field(name="Playtime on KI SCPSL Servers Last Week:", value=f"**{hit[6] // 60}:{hit[6] % 60}** (`{hit[6]} minutes`)", inline=False)
+            embed.add_field(name="Playtime on KI SCPSL Servers Last Week:", value=f"**{hit[6] // 60}:{'%02d' % (hit[6] % 60)}** (`{hit[6]} minutes`)", inline=False)
         
         if hit[7] == 0:
             embed.add_field(name="Playtime on KI SCPSL Servers This Month:", value="**This user has not been seen online this month**", inline=False)
         else:
-            embed.add_field(name="Playtime on KI SCPSL Servers This Month:", value=f"**{hit[7] // 60}:{hit[7] % 60}** (`{hit[7]} minutes`)", inline=False)
+            embed.add_field(name="Playtime on KI SCPSL Servers This Month:", value=f"**{hit[7] // 60}:{'%02d' % (hit[7] % 60)}** (`{hit[7]} minutes`)", inline=False)
         
         if hit[8] == 0:
             embed.add_field(name="Playtime on KI SCPSL Servers Last Month:", value="**This user has not been seen online last month**", inline=False)
         else:
-            embed.add_field(name="Playtime on KI SCPSL Servers Last Month:", value=f"**{hit[8] // 60}:{hit[8] % 60}** (`{hit[8]} minutes`)", inline=False)
+            embed.add_field(name="Playtime on KI SCPSL Servers Last Month:", value=f"**{hit[8] // 60}:{'%02d' % (hit[8] % 60)}** (`{hit[8]} minutes`)", inline=False)
 
         return embed
     
