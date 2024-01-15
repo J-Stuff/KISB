@@ -53,34 +53,39 @@ class AdminCommands(commands.Cog):
             return
         
 
-
-
-
-    # ==== ADMIN TEXT COMMANDS ====
-
-    @commands.command(name="init-here")
-    @commands.is_owner()
-    async def initHere(self, ctx:commands.Context):
-        logger.info(f"{ctx.author} [{ctx.author.id}] ran `init-here` command")
-        response = await ctx.send("Initializing...", delete_after=10)
+    @app_commands.command(name="init-public-board")
+    async def initHere(self, i:discord.Interaction):
+        logger.info(f"{i.user} [{i.user.id}] ran `init-public-board` command")
+        if not await self.bot.is_owner(i.user):
+            logger.info(f"{i.user} [{i.user.id}] failed `init-public-board` slash command for: FAILED PERMISSION CHECK")
+            await i.response.send_message("You don't have permission to do that!\n```REQUIRES: bot.owner```", ephemeral=True)
+            return
+        if type(i.channel) != discord.channel.TextChannel:
+            logger.info(f"{i.user} [{i.user.id}] failed `init-public-board` slash command for: FAILED CHANNEL TYPE CHECK")
+            await i.response.send_message("You can't run this command here!\n`FAILED CHANNEL TYPE CHECK`", ephemeral=True)
+            return
+        await i.response.defer(ephemeral=True, thinking=True)
         try:
             OLD_DATA = CustomFunctions.database.read()
             old_EMBED_CHANNEL = await self.bot.fetch_channel(OLD_DATA["channel"])
             old_EMBED_MESSAGE = await old_EMBED_CHANNEL.fetch_message(OLD_DATA["message"]) #type:ignore
             await old_EMBED_MESSAGE.delete()
         except Exception as e:
-            await ctx.send("Error while deleting old embed! Forcing to continue...", delete_after=5)
+            logger.warn("Error while deleting old embed! Forcing to continue...")
 
         open('./data/database/database.json', 'w').close()
         open('./cache/cache', 'w').close()
         placeholder = discord.Embed(title="Placeholder...")
-        message = await ctx.send(embed=placeholder)
+        message = await i.channel.send(embed=placeholder)
         payload = {
             "message": message.id,
             "channel": message.channel.id,
         }
         CustomFunctions.database.write(payload)
-        await response.edit(content="Done!\n(This message self destructs in 10 seconds)", delete_after=10)
+        await i.followup.send(content="Done!")
+
+
+    # ==== ADMIN TEXT COMMANDS ====
 
 
     @commands.command(name='sync')
