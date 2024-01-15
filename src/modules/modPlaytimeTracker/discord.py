@@ -3,7 +3,7 @@ from _kisb import KISB
 from discord import app_commands
 from  modules.modPlaytimeTracker._database import Database
 from  modules.modPlaytimeTracker._tasks import start as mod_tracker_start
-import discord, typing, logging, time
+import discord, typing, logging, time, datetime
 
 logger = logging.getLogger("main")
 
@@ -28,8 +28,8 @@ class Functions():
 
         if hit[3] == 0:
             embed.add_field(name="Last Seen on a KI SCPSL Server:", value="**This user has not been seen in a server yet**", inline=False)
-        elif now - hit[3] <= 60:
-            embed.add_field(name="Last Seen on a KI SCPSL Server:", value=":green_circle: Online", inline=False)
+        elif now - hit[3] <= 120:
+            embed.add_field(name="Last Seen on a KI SCPSL Server:", value="<:Online:1196591854624444458> Online", inline=False)
         else:    
             embed.add_field(name="Last Seen on a KI SCPSL Server:", value=f"<t:{hit[3]}:R>", inline=False) 
 
@@ -58,6 +58,8 @@ class Functions():
         else:
             embed.add_field(name="Playtime on KI SCPSL Servers Last Month:", value=f"**{hit[8] // 60}:{'%02d' % (hit[8] % 60)}** (`{hit[8]} minutes`)", inline=False)
 
+        embed.set_footer(text="KI SCPSL Mod Playtime Tracker Data valid as of")
+        embed.timestamp = datetime.datetime.now()
         return embed
     
 
