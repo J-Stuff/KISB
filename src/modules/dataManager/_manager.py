@@ -31,6 +31,9 @@ class DataManager():
     
     @classmethod
     def read_cache(cls) -> dict:
+        while cls.lock_check():
+            logger.debug("Cache is locked, waiting...")
+            time.sleep(1)
         cache = json.load(open(cls.cache_location, 'r'))
         logger.debug("Cache Read")
         logger.debug(cache)
@@ -43,10 +46,12 @@ class DataManager():
         return
 
     def update_cache(self) -> None:
+        self.lock(False)
         if self.scpslid is None or self.scpslkey is None:
             exit("SCPSL_ID or SCPSL_KEY is not defined in system environment variables!")
 
         logger.debug("Attempting to update cache...")
+        self.lock(True)
         
         scpsl = SL.fetch(self.scpslid, self.scpslkey)
         logger.debug("New Data Fetched!")
@@ -59,12 +64,14 @@ class DataManager():
             raise Exception()
         else:
             logger.debug("Cache has been written!")
+        self.lock(False)
 
     
     # STOP! This should only be used to lock reads from the database while it is updating
     @classmethod
     def lock(cls, toggle:bool):
         """STOP! This should only be used to lock reads from the database while it is updating"""
+        logger.info(f"Locking Cache: {toggle}")
         if toggle:
             if not os.path.exists(cls.LOCK):
                 open(cls.LOCK, 'w').close()
@@ -75,9 +82,12 @@ class DataManager():
     @classmethod
     def lock_check(cls) -> bool:
         """STOP! This should only be used to lock reads from the database while it is updating"""
+        logger.debug("Checking if cache is locked...")
         if os.path.exists(cls.LOCK):
+            logger.debug("Cache is locked - TRUE")
             return True
         else:
+            logger.debug("Cache is not locked - FALSE")
             return False
 
     
