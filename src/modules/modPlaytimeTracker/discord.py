@@ -90,13 +90,11 @@ class Checks():
     # Checked used in slash commands
 
     @staticmethod
-    def is_mod():
-        def check(i:discord.Interaction):
-            logger.debug(f"Checking if {i.user} is a mod")
-            result = i.user.id in Database().get_all_moderator_discord_ids()
-            logger.debug(f"Result: {result}")
-            return result
-        return app_commands.check(check)
+    def is_mod(i:discord.Interaction):
+        logger.debug(f"Checking if {i.user} is a mod")
+        result = i.user.id in Database().get_all_moderator_discord_ids()
+        logger.debug(f"Result: {result}")
+        return result
     
 
     # Called Checks
@@ -270,7 +268,6 @@ class ModPlaytimeTracker(commands.Cog):
 
     
     @app_commands.command(name="my-playtime", description="Get your playtime - Locked to mods+")
-    @Checks.is_mod()
     async def my_playtime(self, i:discord.Interaction):
         logger.info(f"{i.user} [{i.user.id}] ran `my-playtime` slash command")
         if type(i.channel) == discord.DMChannel:
@@ -282,6 +279,11 @@ class ModPlaytimeTracker(commands.Cog):
             logger.info(f"{i.user} [{i.user.id}] failed `my-playtime` slash command for: FAILED MEMBER CHECK")
             return
         
+        if not Checks.is_mod(i):
+            await i.response.send_message("You do not have permission to use this command", ephemeral=True)
+            logger.info(f"{i.user} [{i.user.id}] failed `my-playtime` slash command for: FAILED PERMISSION CHECK")
+            return
+    
         logger.debug("Passed quick checks")
         await i.response.defer(thinking=True, ephemeral=True)
         logger.debug("Deferring response...")
@@ -291,14 +293,6 @@ class ModPlaytimeTracker(commands.Cog):
             logger.info(f"{i.user} [{i.user.id}] failed `my-playtime` slash command for: USER NOT IN DATABASE")
             return
         await i.followup.send(embed=Functions.generate_single_mod_embed(hit[0]), ephemeral=False)
-
-    @my_playtime.error
-    async def my_playtime_error(self, i:discord.Interaction, error):
-        if isinstance(error, commands.CheckFailure):
-            await i.response.send_message("You do not have permission to use this command", ephemeral=True)
-            logger.info(f"{i.user} [{i.user.id}] failed `my-playtime` slash command for: FAILED PERMISSION CHECK")
-        else:
-            raise error
         
 
     @app_commands.command(name="target-playtime", description="Get a user's playtime - Locked to Admins")
