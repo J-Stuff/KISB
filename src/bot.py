@@ -29,7 +29,7 @@ class CustomFunctions():
 
 
     @staticmethod
-    def generate_embeds(updateNotice:bool = False) -> list[discord.Embed]:
+    def generate_embeds(updateNotice:bool = False) -> list[discord.Embed]|None:
         SL_TRANSLATIONS = KISB.configs.servers
 
         def filter_sl_server(ID:int) -> bool:
@@ -45,7 +45,11 @@ class CustomFunctions():
 
         logger.info("Generating embeds...")
         logger.debug(f"Showing Live update Notice: {updateNotice}")
-        cache = DM.read_cache()
+        try:
+            cache = DM.read_cache()
+        except:
+            logger.warn("Cache read failed! The bot probably hasn't been initialized yet.")
+            return None
         logger.debug(f"Cache read! - {cache}")
         embeds = []
         
@@ -129,6 +133,9 @@ class mainCog(commands.Cog):
             logger.info("Cache doesn't exist! The bot likely hasn't finished booting yet...")
             return
         embeds = CustomFunctions.generate_embeds(True)
+        if embeds == None:
+            logger.warn("Embeds are None! The bot probably hasn't been initialized yet.")
+            return
         try:
             data = CustomFunctions.database.read()
         except:
