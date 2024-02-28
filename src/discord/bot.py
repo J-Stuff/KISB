@@ -9,10 +9,26 @@ logger = logging.getLogger("main")
 class CustomFunctions():
 
 
-    class database():
+    class user_board_database():
         database_location = './data/database/database.json'
-        notify_database_location = './data/database/notify.json'
         
+        @classmethod
+        def read(cls) -> dict:
+            logger.debug("DATABASE READ CALLED")
+            with open(cls.database_location, 'r') as db:
+                return json.load(db)
+        
+
+        @classmethod
+        def write(cls, data:dict) -> None:
+            logger.debug(f"DATABASE WRITE CALLED! - {data}")
+            with open(cls.database_location, 'w') as db:
+                json.dump(data, db)
+
+    
+    class mod_board_database():
+        database_location = './data/modBoard/database.json'
+
         @classmethod
         def read(cls) -> dict:
             logger.debug("DATABASE READ CALLED")
@@ -137,11 +153,15 @@ class mainCog(commands.Cog):
             logger.warn("Embeds are None! The bot probably hasn't been initialized yet.")
             return
         try:
-            data = CustomFunctions.database.read()
+            data = CustomFunctions.user_board_database.read()
+            if data['channel'] == None or data['message'] == None:
+                logger.debug("Channel or message is None!")
+                raise Exception("Channel or message is None!")
         except:
-            logger.warn("Database read failed! The bot probably hasn't been initialized yet.")
+            logger.warn("User Embed Database read failed! The bot probably hasn't been initialized yet.")
             return
         try:
+            logger.debug(f"Fetching channel and message... [CHANNEL] {data['channel']} | [MESSAGE] {data['message']}")
             CHANNEL = await self.bot.fetch_channel(data['channel'])
             MESSAGE = await CHANNEL.fetch_message(data['message']) #type:ignore
             await MESSAGE.edit(embeds=embeds)

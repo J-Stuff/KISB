@@ -24,6 +24,9 @@ class UserCommands(commands.Cog):
             return
         await i.response.defer(thinking=True, ephemeral=True)
         embeds = CustomFunctions.generate_embeds(False)
+        if embeds is None:
+            await i.followup.send(f"Oops, Looks like you've caught me while I'm not quite ready yet... Try again in a few seconds. Or, if this continues. Something has gone desperately wrong and you should inform my developer `{self.bot.buildInfo.AUTHOR}`\nQuote this error message: `ERR-MANUALSTATUS-EMBEDS`", ephemeral=True)
+            return
         logger.debug(f"Embeds generated for manual status command: {embeds}")
         await i.followup.send(embeds=embeds, ephemeral=True)
 
@@ -32,7 +35,7 @@ class UserCommands(commands.Cog):
     async def about(self, i:discord.Interaction):
         logger.info(f"{i.user} [{i.user.id}] ran `status` slash command")
         await i.response.defer(thinking=True, ephemeral=True)
-        embed = discord.Embed(title="About KISB", description=f"Hi, I'm KISB (Kitchen Island Status Bot) I'm a monitoring bot used to display player counts for the KI game servers.\nI'm fully coded from the ground up by my author `{self.bot.buildInfo.AUTHOR}` with some help from a few open source libraries.\nSee my source code at: {self.bot.buildInfo.REPOSITORY}", color=discord.Color.from_str("#4A6F28"))
+        embed = discord.Embed(title="About KISB", description=f"Hi, I'm KISB (Kitchen Island Service Bot) I'm a monitoring bot used to display player counts for the KI game servers. And provide services & functionality for server staff\nI'm fully coded from the ground up by my author `{self.bot.buildInfo.AUTHOR}` with some help from a few open source libraries.\nSee my source code at: {self.bot.buildInfo.REPOSITORY}", color=discord.Color.from_str("#4A6F28"))
         embed.set_author(name="KISB")
         embed.add_field(name="Version", value=self.bot.buildInfo.VERSION, inline=False)
         embed.add_field(name="Build Date", value=self.bot.buildInfo.DATE, inline=False)

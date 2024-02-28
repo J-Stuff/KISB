@@ -1,10 +1,7 @@
 import logging, os
 from _kisb import KISB
-from dotenv import load_dotenv
 from modules.setup.logging import init_logging
 
-if os.path.exists("../.env"):
-    load_dotenv("../.env") # Used for development
 
 init_logging()
 logger = logging.getLogger("main")

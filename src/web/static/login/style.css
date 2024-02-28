@@ -1,0 +1,18 @@
+body {
+    font-family: "Roboto", sans-serif;
+    font-weight: 400;
+    font-style: bold;
+    color: white;
+    background-color: #1c1b22;
+}
+
+
+.login {
+    text-align: center;
+    margin-top: 100px;
+}
+.head-text {
+    font-size: 50px;
+    font-weight: 700;
+    margin-bottom: 20px;
+}

@@ -9,8 +9,8 @@ Logging setup for the logger 'main'
 
 def init_logging():
     """Initializes logging for the bot, using the logger 'main'"""
-    if os.getenv("LOGGING_LEVEL") is not None:
-        logLevel = os.getenv("LOGGING_LEVEL")
+    if os.getenv("PROD_LEVEL") is not None:
+        logLevel = os.getenv("PROD_LEVEL")
         if logLevel == 'debug':
             logLevel = logging.DEBUG
         elif logLevel == 'DEBUG':
@@ -28,11 +28,11 @@ def init_logging():
         else:
             FORMAT = '[%(asctime)s] %(message)s'
         FORMATS = {
-            logging.DEBUG: colored("[%(levelname)s]", "light_cyan", attrs=["bold"]) + colored(" - ", attrs=["bold"]) + colored(FORMAT, "white"),
-            logging.INFO: colored("[%(levelname)s]", "cyan", attrs=["bold"]) + colored(" - ", attrs=["bold"]) + colored(FORMAT, "white"),
-            logging.WARNING: colored("[%(levelname)s]", "yellow", attrs=["bold"]) + colored(" - ", attrs=["bold"]) + colored(FORMAT, "yellow"),
-            logging.ERROR: colored("[%(levelname)s]", "red", attrs=["bold"]) + colored(" - ", attrs=["bold"]) + colored(FORMAT, "red"),
-            logging.CRITICAL: colored("[%(levelname)s]", "red", attrs=["bold", "underline"]) + colored(" - ", attrs=["bold"]) + colored(FORMAT, "red", attrs=["bold"])
+            logging.DEBUG: "[BOT] " + colored("[%(levelname)s]", "light_cyan", attrs=["bold"]) + colored(" - ", attrs=["bold"]) + colored(FORMAT, "white"),
+            logging.INFO: "[BOT] " + colored("[%(levelname)s]", "cyan", attrs=["bold"]) + colored(" - ", attrs=["bold"]) + colored(FORMAT, "white"),
+            logging.WARNING: "[BOT] " + colored("[%(levelname)s]", "yellow", attrs=["bold"]) + colored(" - ", attrs=["bold"]) + colored(FORMAT, "yellow"),
+            logging.ERROR: "[BOT] " + colored("[%(levelname)s]", "red", attrs=["bold"]) + colored(" - ", attrs=["bold"]) + colored(FORMAT, "red"),
+            logging.CRITICAL: "[BOT] " + colored("[%(levelname)s]", "red", attrs=["bold", "underline"]) + colored(" - ", attrs=["bold"]) + colored(FORMAT, "red", attrs=["bold"])
         }
 
         def format(self, record: LogRecord) -> str:

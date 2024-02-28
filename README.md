@@ -30,17 +30,23 @@ This is a bot that will post the status of the KI Network to a Discord embed. As
 | Variable | Description | Default |
 | --- | --- | --- |
 | TOKEN | Discord Bot Token | `None` |
+| DISCORD_CLIENT_ID | Discord Client ID | `None` |
+| DISCORD_CLIENT_SECRET | Discord Client Secret | `None` |
+| DISCORD_REDIRECT_URI | Discord Redirect URI | `None` |
 | SCPSL_ID | Server ID for the Lobby List API. See https://support.scpslgame.com/article/61 | `None` |
 | SCPSL_KEY | Server Key for the Lobby List API. See https://support.scpslgame.com/article/61 | `None` |
 | TZ | Timezone for the bot. See https://en.wikipedia.org/wiki/List_of_tz_database_time_zones | `Pacific/Auckland` |
-| LOGGING_LEVEL | Logging level for the bot. Can be either `info` or `debug` | `info` |
+| PROD_LEVEL | Logging and other pod/dev levels for the bot. Can be either `info` or `debug` | `info` |
 
-
+### Development Environment Variables
+| Variable | Description | Default |
+| --- | --- | --- |
+| VENV_LOCATION | Path to the virtual environment. | `None` |
 
 <b>PLEASE NOTE:
 Some functions should ideally be run overnight when the server is empty. These will run at 0600 (6AM) in the timezone specified.
 
-See the ./modPlaytimeTracker/_tasks.py/start() function for what and when these tasks are run.</b>
+See the /src/discord/modules/modPlaytimeTracker/_tasks.py/start() function for what and when these tasks are run.</b>
 
 ### Docker Volume Paths
-"/worker/data" - Main Datastore
+"/worker/discord/data" - Main Datastore

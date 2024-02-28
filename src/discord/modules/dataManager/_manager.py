@@ -5,7 +5,7 @@ from _kisb import KISB
 logger = logging.getLogger("main")
 
 class DataManager():
-    LOCK = "./cahce/locks/API_DATA.lock"
+    LOCK = "./cache/locks/API_DATA.lock"
     cache_location = './cache/CACHE'
     def __init__(self) -> None:
         self.scpslid = os.getenv("SCPSL_ID")
@@ -53,7 +53,12 @@ class DataManager():
         logger.debug("Attempting to update cache...")
         self.lock(True)
         
-        scpsl = SL.fetch(self.scpslid, self.scpslkey)
+        try:
+            scpsl = SL.fetch(self.scpslid, self.scpslkey)
+        except Exception as e:
+            self.lock(False)
+            raise e
+        
         logger.debug("New Data Fetched!")
         self._write_cache({"sl": scpsl, "updated": time.time()})
         logger.debug("Cache Updated!")

@@ -1,4 +1,4 @@
-import discord, logging, datetime
+import discord, logging, datetime, asyncio
 from discord.ext import commands
 from enum import StrEnum
 
@@ -44,5 +44,6 @@ class KISB(commands.Bot):
         logger.info("Loading cogs...")
         for cog in self.cogList:
             logger.info(f"Loading cog: {cog}")
+            await asyncio.sleep(3)
             await self.load_extension(f"{cog}")
             # A log should be made by the cog itself announcing it's loaded

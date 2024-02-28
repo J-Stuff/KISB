@@ -1,9 +1,10 @@
-import discord, logging
+import discord, logging, typing, asyncio
 from discord.ext import commands
 from discord import app_commands
 from _kisb import KISB
 from bot import CustomFunctions
 from modules.dataManager._manager import DataManager as DM
+from modules.modPlaytimeTracker._database import Database as MDB
 logger = logging.getLogger("main")
 class AdminCommands(commands.Cog):
     def __init__(self, bot:KISB) -> None:
@@ -45,7 +46,7 @@ class AdminCommands(commands.Cog):
         
         await i.response.defer(ephemeral=False, thinking=True)
         try:
-            await i.followup.send(files=[discord.File(DM.cache_location), discord.File(CustomFunctions.database.database_location)], ephemeral=False)
+            await i.followup.send(files=[discord.File(DM.cache_location), discord.File(CustomFunctions.mod_board_database.database_location), discord.File(CustomFunctions.mod_board_database.database_location)], ephemeral=False)
             logger.debug("Sent debug files")
         except discord.Forbidden:
             await i.followup.send(content="I lack permission to send files here!", ephemeral=False)
@@ -66,23 +67,79 @@ class AdminCommands(commands.Cog):
             return
         await i.response.defer(ephemeral=True, thinking=True)
         try:
-            OLD_DATA = CustomFunctions.database.read()
+            OLD_DATA = CustomFunctions.user_board_database.read()
             old_EMBED_CHANNEL = await self.bot.fetch_channel(OLD_DATA["channel"])
             old_EMBED_MESSAGE = await old_EMBED_CHANNEL.fetch_message(OLD_DATA["message"]) #type:ignore
             await old_EMBED_MESSAGE.delete()
         except Exception as e:
             logger.warn("Error while deleting old embed! Forcing to continue...")
 
-        open('./data/database/database.json', 'w').close()
-        open('./cache/cache', 'w').close()
-        placeholder = discord.Embed(title="Placeholder...")
+        open(CustomFunctions.user_board_database.database_location, 'w').close()
+        placeholder = discord.Embed(title="Placeholder...", description="PUBLIC BOARD")
         message = await i.channel.send(embed=placeholder)
         payload = {
             "message": message.id,
             "channel": message.channel.id,
         }
-        CustomFunctions.database.write(payload)
+        CustomFunctions.user_board_database.write(payload)
         await i.followup.send(content="Done!")
+
+    @app_commands.command(name="init-mod-board")
+    async def initModBoard(self, i:discord.Interaction):
+        logger.info(f"{i.user} [{i.user.id}] ran `init-mod-board` command")
+        if not await self.bot.is_owner(i.user):
+            logger.info(f"{i.user} [{i.user.id}] failed `init-mod-board` slash command for: FAILED PERMISSION CHECK")
+            await i.response.send_message("You don't have permission to do that!\n```REQUIRES: bot.owner```", ephemeral=True)
+            return
+        if type(i.channel) != discord.channel.TextChannel:
+            logger.info(f"{i.user} [{i.user.id}] failed `init-mod-board` slash command for: FAILED CHANNEL TYPE CHECK")
+            await i.response.send_message("You can't run this command here!\n`FAILED CHANNEL TYPE CHECK`", ephemeral=True)
+            return
+        await i.response.defer(ephemeral=True, thinking=True)
+
+        try:
+            OLD_DATA = CustomFunctions.mod_board_database.read()
+            old_EMBED_CHANNEL = await self.bot.fetch_channel(OLD_DATA["channel"])
+            old_EMBED_MESSAGE = await old_EMBED_CHANNEL.fetch_message(OLD_DATA["message"]) #type:ignore
+            await old_EMBED_MESSAGE.delete()
+        except Exception as e:
+            logger.warn("Error while deleting old embed! Forcing to continue...")
+
+        open(CustomFunctions.mod_board_database.database_location, 'w').close()
+        placeholder = discord.Embed(title="Placeholder...", description="MOD BOARD")
+        message = await i.channel.send(embed=placeholder)
+        payload = {
+            "message": message.id,
+            "channel": message.channel.id,
+        }
+        CustomFunctions.mod_board_database.write(payload)
+        await i.followup.send(content="Done!")
+
+    @app_commands.command(name="rollover-playtime")
+    async def manualRollover(self, i:discord.Interaction, date_to_rollover:typing.Literal["d", "w", "m"]):
+        logger.info(f"{i.user} [{i.user.id}] ran `rollover-playtime` command")
+        if not await self.bot.is_owner(i.user):
+            logger.info(f"{i.user} [{i.user.id}] failed `rollover-playtime` slash command for: FAILED PERMISSION CHECK")
+            await i.response.send_message("You don't have permission to do that!\n```REQUIRES: bot.owner```", ephemeral=True)
+            return
+    
+        await i.response.defer(ephemeral=False, thinking=True)
+        
+        if date_to_rollover == "d":
+            MDB().reset_playtime_today()
+            await i.followup.send(content="Done!")
+        elif date_to_rollover == "w":
+            MDB().tickover_playtime_month()
+            await i.followup.send(content="Done!")
+        elif date_to_rollover == "m":
+            MDB().tickover_playtime_month()
+            await i.followup.send(content="Done!")
+        else:
+            await i.followup.send(content="Invalid timeframe to rollover!")
+            return
+        
+
+            
 
 
     # ==== ADMIN TEXT COMMANDS ====

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unauthorized</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css?family=Roboto" rel="stylesheet">
+    <style>
+        body {
+            font-family: "Roboto", sans-serif;
+            font-weight: 400;
+            font-style: bold;
+            color: white;
+            background-color: #1c1b22;
+        }
+
+
+        .error {
+            text-align: center;
+            margin-top: 100px;
+        }
+        .head-text {
+            font-size: 50px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+    </style>
+
+    <script>
+        window.addEventListener('load', () => {
+            const queryString = window.location.search;
+            const params = new URLSearchParams(queryString);
+            
+            params.forEach((value, key) => {
+                console.log(`${key}: ${value}`);
+            });
+
+            const error = params.get("error");
+            const text = document.getElementById("error-text");
+
+            if (error === "access_denied") {
+                text.innerHTML = "You denied the Discord authorization request.";
+            }
+            else if (error === "unauthorized_guild") {
+                text.innerHTML = "You attempted to access a resource that you are not authorized to access.";
+            }
+        });
+    </script>
+</head>
+<body>
+    <div class="error">
+        <h1 class="head-text">Unauthorized</h1>
+        <h3 id="error-text">The Server provided no further information</h3>
+    </div>
+</body>
+</html>
