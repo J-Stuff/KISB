@@ -1,5 +1,3 @@
-import threading
-import os
 from enum import StrEnum
 
 class Config:
