@@ -92,11 +92,11 @@ class PublicEmbed(commands.Cog):
     @tasks.loop(seconds=15, reconnect=True)
     async def updateEmbed(self):
         db = Functions.read_discord_database()
-        channel_id = db["channel"]
-        message_id = db["message"]
-        if not channel_id or not message_id:
+        if db == {}:
             logger.info("KISB has not had its public embed initialized yet!")
             return
+        channel_id = db["channel"]
+        message_id = db["message"]
         channel = self.bot.get_channel(int(channel_id))
         message = await channel.fetch_message(int(message_id)) #type:ignore <- Type checking being an arse
 
