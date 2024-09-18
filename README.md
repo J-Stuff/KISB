@@ -1,6 +1,6 @@
-# KISB - Kitchen Island Status Bot
-## What is this?
-This is a bot that will post the status of the KI Network to a Discord embed. As well as using a custom command to post the status of the KI Network in response to a command.
+# KISB - Kitchen Island Service Bot
+
+KISB is a Service Bot for the Kitchen Island game network.
 
 ## Developers
 - JStuffNZ - Main Developer
@@ -24,7 +24,7 @@ This is a bot that will post the status of the KI Network to a Discord embed. As
 ```
 
 ## Version: 
-- 1.2.6
+- 2.0.0
 
 ### Required Environment Variables
 "TOKEN" - Discord Bot Token
@@ -32,6 +32,9 @@ This is a bot that will post the status of the KI Network to a Discord embed. As
 "SCPSL_ID" - Server ID for the Lobby List API. See https://support.scpslgame.com/article/61
 
 "SCPSL_KEY" - Server Key for the Lobby List API. See https://support.scpslgame.com/article/61
+
+### Optional Environment Variables
+"LOG_LEVEL" - Logging Level. Can be either "DEBUG" or "INFO" | <!> DANGEROUS <!> - Setting this to "DEBUG" will log sensitive information.
 
 ### Docker Volume Paths
 "/worker/data" - Main Datastore
