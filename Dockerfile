@@ -12,4 +12,7 @@ WORKDIR /worker
 
 RUN pip install -r /worker/requirements.txt
 
+RUN mkdir /cache
+RUN mkdir /data
+
 CMD ["python", "main.py"]
