@@ -1,0 +1,32 @@
+name: Integration Test
+on: [push]
+jobs:
+  build:
+    if: github.event_name == 'pull_request' && github.event.action == 'closed' && github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v2
+
+      - name: Get Versioning Data
+        id: versioning
+        uses: Soumeh/Auto-Versioning@main
+
+      - name: Update Version File
+        uses: rfennell/JSONFileVersioner@v1
+        with:
+          path: 'src'
+          field: 'version'
+          VersionNumber: ${{ steps.versioning.outputs.tag }}
+          filenamepattern: '.json'
+          recursion: "true"
+        
+      - name: Create Release
+        uses: meeDamian/github-release@2.0
+        with:
+          token: ${{ secrets.PAT }}
+          # names the release after the head commit
+          name: ${{ github.event.head_commit.message }}
+          tag: ${{ steps.versioning.outputs.tag }}
+          body: "${{ steps.versioning.outputs.changelog }}"
+          gzip: false
