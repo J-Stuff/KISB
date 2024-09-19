@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: read
+      contents: write
       packages: write
     
     # Checkout (clone) repo
@@ -40,7 +40,7 @@ jobs:
       # Update version file
       - uses: DamianReeves/write-file-action@master
         with:
-          path: /src/version.json
+          path: src/version.json
           contents: |
             {"version": ${{ steps.meta.outputs.version }}}
           write-mode: overwrite
