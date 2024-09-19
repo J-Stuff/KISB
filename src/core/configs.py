@@ -5,7 +5,7 @@ class Config:
     # This class needs to remain thread-safe at all times.
 
     class Build(StrEnum):
-        Version = (json.load(open("/version.json", 'r')))["version"]
+        Version = (json.load(open("./version.json", 'r')))["version"]
         Author = "https://github.com/J-Stuff"
     
     class Paths:
