@@ -1,0 +1,11 @@
+Dev docs:
+
+When users are being watched by the system for playtime we need to ensure we catch the start and end of their session.
+
+If the bot crashes, misses their exit or fails to collect a fresh cahce. We need to have procedues in place for how to handle it.
+
+Rules for untracked disconnects:
+1. If we catch a user online that we havent seen join. We start tracking them from the moment we see them online.
+If we catch a user offline, they session ends 5 minutes after they were last seen (we count this as their last seen not after the 5 minutes has lapsed, which is why we use the LAST_SEEN record in the usertracking DB)
+If we catch a user offline that has been offline for between 5-10 minutes their playtime session ends ASAP.
+If we catch a user who has been offline for more than 10 minutes we end their session at their last seen time.
