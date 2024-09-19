@@ -1,10 +1,11 @@
 from enum import StrEnum
+import json
 
 class Config:
     # This class needs to remain thread-safe at all times.
 
     class Build(StrEnum):
-        Version = "2.0.1"
+        Version = (json.load(open("/version.json", 'r')))["version"]
         Author = "https://github.com/J-Stuff"
     
     class Paths:

@@ -64,7 +64,7 @@ def _create_exception(response: requests.Response) -> Never:
 
 def _make_request() -> dict: # type:ignore
     ID, KEY = _get_credentials()
-    URL = f"{Config.base}?{Config.id_param}{ID}&{Config.key_param}{KEY}"
+    URL = f"{Config.base}?{Config.id_param}{int(ID)}&{Config.key_param}{str(KEY)}"
     for param in Config.params:
         URL += f"&{param}"
     logger.debug(f"Requesting URL: {URL}")
