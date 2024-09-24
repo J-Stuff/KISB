@@ -58,7 +58,9 @@ logger.info("Preparing...")
 if not os.path.exists(f"{Config.Paths.data_path}/discord"):
     os.makedirs(f"{Config.Paths.data_path}/discord")
     logger.debug("Discord DataDir has been generated")
-
+if not os.path.exists(f"{Config.Paths.data_path}/users"):
+    os.makedirs(f"{Config.Paths.data_path}/users")
+    logger.debug("Users DataDir has been generated")
 
 # KISB should look for any files in its cache directory and remove them.
 # Should only really ever be needed when running in the development environment
