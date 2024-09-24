@@ -222,7 +222,10 @@ class PublicEmbed(commands.Cog):
         
         embed.set_footer(text=f"KISB {Config.Build.Version} | Last Updated")
         embed.timestamp = datetime.datetime.fromtimestamp(slData["Updated"])
-        await message.edit(content="", embed=embed)
+        try:
+            await message.edit(content="", embed=embed)
+        except:
+            logger.exception("Discord Failed to update the embed. Trying again on the next scheduled loop.")
 
 
 async def setup(bot:KISB):
