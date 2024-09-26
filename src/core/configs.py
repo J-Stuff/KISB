@@ -32,7 +32,7 @@ class Config:
 
     class Static:
         
-        required_loggers = ["boot", "slapi", "bot", "schedule"]
+        required_loggers = ["boot", "slapi", "bot", "schedule" "user_tracker"]
         
         server_translations = { # These need to be the {"SERVER ID": "DISPLAY NAME"}
             "60048": "Official 1",  # Port: 7777

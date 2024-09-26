@@ -5,9 +5,6 @@ KISB is a Service Bot for the Kitchen Island game network.
 ## Developers
 - JStuffNZ - Main Developer
 
-## Version: 
-- 2.0.3
-
 ### Required Environment Variables
 "TOKEN" - Discord Bot Token
 
