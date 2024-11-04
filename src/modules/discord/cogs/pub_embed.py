@@ -160,69 +160,80 @@ class PublicEmbed(commands.Cog):
 
     @tasks.loop(seconds=15, reconnect=True)
     async def updateEmbed(self):
-        db = Functions.read_discord_database()
-        if db == {}:
-            logger.info("KISB has not had its public embed initialized yet! I will stop the update loop until it is initialized.")
-            self.updateEmbed.stop()
-            return
-        
-
-        # Backwards Compatibility for pre-2.0.3
         try:
-            db["maintenance"]
-        except KeyError:
-            Functions.migrate_db()
             db = Functions.read_discord_database()
+            if db == {}:
+                logger.info("KISB has not had its public embed initialized yet! I will stop the update loop until it is initialized.")
+                self.updateEmbed.stop()
+                return
+            
 
-        channel_id = db["channel"]
-        message_id = db["message"]
-        maintenance = db["maintenance"]
-        if maintenance:
-            logger.info("Maintenance mode enabled. Shutting down updateEmbed loop.")
-            self.updateEmbed.stop()
-            return
+            # Backwards Compatibility for pre-2.0.3
+            try:
+                db["maintenance"]
+            except KeyError:
+                Functions.migrate_db()
+                db = Functions.read_discord_database()
+
+            channel_id = db["channel"]
+            message_id = db["message"]
+            maintenance = db["maintenance"]
+            if maintenance:
+                logger.info("Maintenance mode enabled. Shutting down updateEmbed loop.")
+                self.updateEmbed.stop()
+                return
+            
+            channel = self.bot.get_channel(int(channel_id))
+            message = await channel.fetch_message(int(message_id)) #type:ignore <- Type checking being an arse
+
+            embed = discord.Embed(title="SCP:SL Server Stats", color=0x5865f2)
+            embed.set_author(name="KISB", url="https://github.com/J-Stuff/KISB")
+            embed.set_thumbnail(url=Config.Discord.asset_SCPslLogo)
+
+            slData = read_cache()
+
+            if type(slData) != dict:
+                logger.exception("Cache was poisoned and is invalid when I attempted to read it!")
+                raise Exception
+            if slData == {}:
+                logger.warning("The Cache is blank! Public embed will skip updating and retry in 30 seconds.")
+                return
+
+            slServers = slData["Servers"]
+            serverNames = Config.Static.server_translations
+
+            for server in slServers:
+                serverID = str(server["ID"])
+                if serverID not in serverNames.keys():
+                    continue
+
+                name = serverNames[serverID]
+
+                playerRatio = Fraction(server["Players"]).as_integer_ratio()
+                serverFull = playerRatio[0] >= playerRatio[1]
+
+                if not server["Online"]:
+                    embed.add_field(name=name, value=f"⚠️ {Config.Discord.emoji_NoConnection} **Offline!** - `0/0 Players Online`", inline=False)
+                elif not serverFull:
+                    embed.add_field(name=name, value=f"{Config.Discord.emoji_HighConnection} **Online** - `{server['Players']} Players Online`", inline=False)
+                elif serverFull:
+                    embed.add_field(name=name, value=f"{Config.Discord.emoji_ServerFull} **Full** - `{server['Players']} Players Online`", inline=False)
+                else:
+                    embed.add_field(name=name, value=f"🔘 {Config.Discord.emoji_NoConnection} **Unknown** - `0/0 Players Online`", inline=False)
+            
+            embed.set_footer(text=f"KISB {Config.Build.Version} | Last Updated")
+            embed.timestamp = datetime.datetime.fromtimestamp(slData["Updated"])
+            try:
+                await message.edit(content="", embed=embed)
+            except:
+                logger.exception("Discord Failed to update the embed. Trying again on the next scheduled loop.")
         
-        channel = self.bot.get_channel(int(channel_id))
-        message = await channel.fetch_message(int(message_id)) #type:ignore <- Type checking being an arse
-
-        embed = discord.Embed(title="SCP:SL Server Stats", color=0x5865f2)
-        embed.set_author(name="KISB", url="https://github.com/J-Stuff/KISB")
-        embed.set_thumbnail(url=Config.Discord.asset_SCPslLogo)
-
-        slData = read_cache()
-
-        if type(slData) != dict:
-            logger.exception("Cache was poisoned and is invalid when I attempted to read it!")
-            raise Exception
-        if slData == {}:
-            logger.warning("The Cache is blank! Public embed will skip updating and retry in 30 seconds.")
-            return
-
-        slServers = slData["Servers"]
-        serverNames = Config.Static.server_translations
-
-        for server in slServers:
-            serverID = str(server["ID"])
-            if serverID not in serverNames.keys():
-                continue
-
-            name = serverNames[serverID]
-
-            playerRatio = Fraction(server["Players"]).as_integer_ratio()
-            serverFull = playerRatio[0] >= playerRatio[1]
-
-            if not server["Online"]:
-                embed.add_field(name=name, value=f"⚠️ {Config.Discord.emoji_NoConnection} **Offline!** - `0/0 Players Online`", inline=False)
-            elif not serverFull:
-                embed.add_field(name=name, value=f"{Config.Discord.emoji_HighConnection} **Online** - `{server['Players']} Players Online`", inline=False)
-            elif serverFull:
-                embed.add_field(name=name, value=f"{Config.Discord.emoji_ServerFull} **Full** - `{server['Players']} Players Online`", inline=False)
-            else:
-                embed.add_field(name=name, value=f"🔘 {Config.Discord.emoji_NoConnection} **Unknown** - `0/0 Players Online`", inline=False)
         
-        embed.set_footer(text=f"KISB {Config.Build.Version} | Last Updated")
-        embed.timestamp = datetime.datetime.fromtimestamp(slData["Updated"])
-        await message.edit(content="", embed=embed)
+        except Exception as e: 
+            # You may be here asking yourself, why the fuck I added a catch all here. The simple answer is because Discord's API is a BITCH and will sometimes 502 for no reason.
+            # And this runs every 15 seconds anyways so if an execution is missed it will be caught up by the time the next update is ran.
+            logger.warning("Something went wrong while trying to update the Public Embed")
+            logger.exception(e)
 
 
 async def setup(bot:KISB):
