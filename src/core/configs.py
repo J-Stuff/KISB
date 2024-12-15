@@ -38,7 +38,10 @@ class Config:
             "60048": "Official 1",  # Port: 7777
             "68070": "Official 2",  # Port: 7778
             "70516": "Community 3", # Port: 7779
-            "79856": "Community 4", # Port: 7780
+            "79856": "Community 4", # Port: 7780,
+            "81948": "SCP:SL Public Beta 1", # Port: 7775
+            "82935": "SCP:SL Public Beta 2" # Port: 7776
+
         }
 
     class Discord(StrEnum):
