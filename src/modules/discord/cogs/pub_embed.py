@@ -208,9 +208,12 @@ class PublicEmbed(commands.Cog):
                     continue
 
                 name = serverNames[serverID]
-
-                playerRatio = Fraction(server["Players"]).as_integer_ratio()
-                serverFull = playerRatio[0] >= playerRatio[1]
+                try:
+                    playerRatio = Fraction(server["Players"]).as_integer_ratio()
+                    serverFull = playerRatio[0] >= playerRatio[1]
+                except:
+                    playerRatio = "0/0"
+                    serverFull = False
 
                 if not server["Online"]:
                     embed.add_field(name=name, value=f"⚠️ {Config.Discord.emoji_NoConnection} **Offline!** - `0/0 Players Online`", inline=False)
